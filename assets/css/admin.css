@@ -1,0 +1,61 @@
+.referrer-analytics-referrer-option {
+  margin-bottom: 0.3rem;
+}
+
+.referrer-ananlytics-referrer-header,
+.referrer-analytics-referrer-option {
+  display: flex;
+}
+
+.referrer-ananlytics-referrer-header div,
+.referrer-analytics-input {
+  width: calc(100% / 3);
+}
+
+.referrer-ananlytics-referrer-header div {
+  margin-bottom: 0.3rem;
+}
+
+.referrer-ananlytics-referrer-header label {
+  font-weight: bold;
+}
+
+.referrer-ananlytics-referrer-header small {
+  color: #666;
+  font-style: italic;
+  display: block;
+}
+
+.referrer-analytics-boxes {
+  display: flex;
+  flex-wrap: nowrap;
+  margin-left: -8px;
+  margin-right: -8px;
+}
+
+.referrer-analytics-box {
+  background: #fff;
+  border: 1px solid #ccd0d4;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+  margin-left: 8px;
+  margin-right: 8px;
+  width: calc(100% - 16px);
+}
+
+.referrer-analytics-box h3 {
+  border-bottom: 1px solid #ccd0d4;
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.referrer-analytics-box .inside,
+.referrer-analytics-box h3 {
+  padding: 12px;
+}
+
+@media (min-width: 768px) {
+  .referrer-analytics-box {
+    width: calc(50% - 16px);
+  }
+}
