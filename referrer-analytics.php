@@ -516,6 +516,12 @@ if ( ! function_exists( 'referrer_analytics_get_known' ) ) {
       'www.google.dk'      => [ 'host' => 'google.dk', 'type' => 'organic', 'name' => 'Google (DK)' ],
       'google.es'          => [ 'host' => 'google.es', 'type' => 'organic', 'name' => 'Google (ES)' ],
       'www.google.es'      => [ 'host' => 'google.es', 'type' => 'organic', 'name' => 'Google (ES)' ],
+      'google.fr'          => [ 'host' => 'google.fr', 'type' => 'organic', 'name' => 'Google (FR)' ],
+      'www.google.fr'      => [ 'host' => 'google.fr', 'type' => 'organic', 'name' => 'Google (FR)' ],
+      'google.cl'          => [ 'host' => 'google.cl', 'type' => 'organic', 'name' => 'Google (CL)' ],
+      'www.google.cl'      => [ 'host' => 'google.cl', 'type' => 'organic', 'name' => 'Google (CL)' ],
+      'google.ca'          => [ 'host' => 'google.ca', 'type' => 'organic', 'name' => 'Google (CA)' ],
+      'www.google.ca'      => [ 'host' => 'google.ca', 'type' => 'organic', 'name' => 'Google (CA)' ],
       'bing.com'           => [ 'host' => 'bing.com', 'type' => 'organic', 'name' => 'Bing' ],
       'www.bing.com'       => [ 'host' => 'bing.com', 'type' => 'organic', 'name' => 'Bing' ],
       'cn.bing.com'        => [ 'host' => 'bing.com', 'type' => 'organic', 'name' => 'Bing (CN)' ],
@@ -530,7 +536,9 @@ if ( ! function_exists( 'referrer_analytics_get_known' ) ) {
       'www.ecosia.com'     => [ 'host' => 'ecosia.com', 'type' => 'organic', 'name' => 'Ecosia' ],
 
       // Websites
-      'csstricks.com' => [ 'host' => 'csstricks.com', 'type' => 'backlink', 'name' => 'CSS-Tricks' ],
+      'csstricks.com'  => [ 'host' => 'csstricks.com', 'type' => 'backlink', 'name' => 'CSS-Tricks' ],
+      'benmarshall.me' => [ 'host' => 'benmarshall.me', 'type' => 'backlink', 'name' => 'Ben Marshall' ],
+      'cdpn.io'        => [ 'host' => 'cdpn.io', 'type' => 'backlink', 'name' => 'CodePen' ],
 
       // Social media
       'facebook.com'   => [ 'host' => 'facebook.com', 'type' => 'social', 'name' => 'Facebook' ],
