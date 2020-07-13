@@ -53,14 +53,34 @@ function referrer_analytics_options_page() {
   $log = array_reverse( $log );
 
   $known  = referrer_analytics_get_known();
-  $parsed = referrer_analytics_parsed_log( $log );
+  $parsed = referrer_analytics_parse_log( $log );
 
+  // Paging variables
   $log_limit      = 20;
   $log_size       = referrer_analytics_log_size();
   $total_pages    = ceil( count( $log  ) / $log_limit );
   $current_page   = isset( $_GET['pagenum'] ) ? absint( $_GET['pagenum'] ) : 1;
   $starting_index = ( $current_page * $log_limit ) - $log_limit + 1;
   $ending_index   = ( $current_page * $log_limit );
+
+  $referrer_totals    = $parsed['totals']['referrers'];
+  $type_totals        = $parsed['totals']['types'];
+  $destination_totals = $parsed['totals']['destinations'];
+
+  // Sort the results
+  if ( $referrer_totals ) {
+    usort($referrer_totals, function($a, $b) {
+      return $b['count'] <=> $a['count'];
+    });
+  }
+
+  if ( $type_totals ) {
+    arsort( $type_totals );
+  }
+
+  if ( $destination_totals ) {
+    arsort( $destination_totals );
+  }
   ?>
   <div class="wrap">
     <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
@@ -68,62 +88,136 @@ function referrer_analytics_options_page() {
     <?php if ( $current_page === 1 ): ?>
       <h2><?php _e( 'Statistics', 'referrer-analytics' ); ?></h2>
       <div class="referrer-analytics-boxes">
-        <div class="referrer-analytics-box">
-          <h3><?php _e( 'Referrers', 'referrer-analytics' ); ?></h3>
+        <div class="referrer-analytics-box referrer-analytics-box-top-referrers">
+          <h3><?php _e( 'Top 10 Referrers', 'referrer-analytics' ); ?></h3>
           <div class="inside">
-            <canvas id="referrer-analytics-pie-referrers"></canvas>
+            <?php if ( $referrer_totals ): ?>
+              <ol>
+                <?php
+                $cnt = 0;
+                foreach( $referrer_totals as $key => $entry ):
+                  $cnt++;
+                  if ( $cnt > 10 ) { break; }
+                  ?>
+                  <li>
+                    <?php if ( ! empty( $entry['url'] ) ): ?><a href="<?php echo esc_url( $entry['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php endif; ?>
+                      <strong><?php echo $entry['name']; ?></strong>
+                    <?php if ( ! empty( $entry['url'] ) ): ?></a><?php endif; ?> &mdash; <?php echo $entry['count']; ?>
+                    <?php if ( ! empty( $entry['type'] ) ): ?>
+                      (<?php echo $entry['type']; ?>)
+                    <?php endif; ?>
+                    <?php if ( ! empty( $entry['flag'] ) && $entry['flag'] ): ?>
+                      <span style="color: #ca4a1f;"><?php _e( 'potentially malicious, consider blocking', 'referrer-analytics' ); ?></span>
+                    <?php endif; ?>
+                  </li>
+                <?php endforeach; ?>
+              </ol>
+            <?php else: ?>
+              <?php _e( 'No data to report yet.', 'referrer-analytics' ); ?>
+            <?php endif; ?>
           </div>
         </div>
-        <div class="referrer-analytics-box">
+        <div class="referrer-analytics-box referrer-analytics-box-top-types">
+          <h3><?php _e( 'Top 10 Referrer Types', 'referrer-analytics' ); ?></h3>
+          <div class="inside">
+            <?php if ( $type_totals ): ?>
+              <ol>
+                <?php
+                $cnt = 0;
+                foreach( $type_totals as $type => $count ):
+                  $cnt++;
+                  if ( $cnt > 10 ) { break; }
+                  ?>
+                  <li><strong><?php echo $type; ?></strong> &mdash; <?php echo $count; ?></li>
+                <?php endforeach; ?>
+              </ol>
+            <?php else: ?>
+              <?php _e( 'No data to report yet.', 'referrer-analytics' ); ?>
+            <?php endif; ?>
+          </div>
+        </div>
+        <div class="referrer-analytics-box referrer-analytics-box-top-types">
+          <h3><?php _e( 'Top 10 Referred Destinations', 'referrer-analytics' ); ?></h3>
+          <div class="inside">
+            <?php if ( $destination_totals ): ?>
+              <ol>
+                <?php
+                $cnt = 0;
+                foreach( $destination_totals as $url => $count ):
+                  $cnt++;
+                  if ( $cnt > 10 ) { break; }
+                  ?>
+                  <li><strong><a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo str_replace( site_url(), '', $url ); ?></a></strong> &mdash; <?php echo $count; ?></li>
+                <?php endforeach; ?>
+              </ol>
+            <?php else: ?>
+              <?php _e( 'No data to report yet.', 'referrer-analytics' ); ?>
+            <?php endif; ?>
+          </div>
+        </div>
+        <div class="referrer-analytics-box referrer-analytics-box-referrers-pie">
+          <h3><?php _e( 'Referrers', 'referrer-analytics' ); ?></h3>
+          <div class="inside">
+            <?php if ( $parsed['charts']['referrers']['data'] ): ?>
+              <canvas id="referrer-analytics-pie-referrers"></canvas>
+              <script>
+              var referrers = document.getElementById('referrer-analytics-pie-referrers');
+              var referrerAnalyticsPie = new Chart(referrers, {
+                type: 'pie',
+                data: {
+                  labels: <?php echo json_encode( $parsed['charts']['referrers']['labels'] ); ?>,
+                  datasets: [{
+                    data: [<?php echo implode( ',', $parsed['charts']['referrers']['data'] ); ?>],
+                    backgroundColor: <?php echo json_encode( $parsed['charts']['referrers']['colors'] ); ?>,
+                    borderWidth: 2,
+                    borderColor: '#f1f1f1'
+                  }],
+                },
+                options: {
+                  legend: {
+                    position: 'right',
+                    fullWidth: false
+                  }
+                }
+              });
+              </script>
+            <?php else: ?>
+              <?php _e( 'No data to report yet.', 'referrer-analytics' ); ?>
+            <?php endif; ?>
+          </div>
+        </div>
+        <div class="referrer-analytics-box referrer-analytics-box-type-pie">
           <h3><?php _e( 'Referrer Types', 'referrer-analytics' ); ?></h3>
           <div class="inside">
-            <canvas id="referrer-analytics-pie-types"></canvas>
+            <?php if ( $parsed['charts']['type']['data'] ): ?>
+              <canvas id="referrer-analytics-pie-types"></canvas>
+              <script>
+              var types = document.getElementById('referrer-analytics-pie-types');
+              var referrerAnalyticsPie = new Chart(types, {
+                type: 'pie',
+                data: {
+                  labels: <?php echo json_encode( $parsed['charts']['type']['labels'] ); ?>,
+                  datasets: [{
+                    data: [<?php echo implode( ',', $parsed['charts']['type']['data'] ); ?>],
+                    backgroundColor: <?php echo json_encode( $parsed['charts']['type']['colors'] ); ?>,
+                    borderWidth: 2,
+                    borderColor: '#f1f1f1'
+                  }],
+                },
+                options: {
+                  legend: {
+                    position: 'right',
+                    fullWidth: false
+                  }
+                }
+              });
+              </script>
+            <?php else: ?>
+              <?php _e( 'No data to report yet.', 'referrer-analytics' ); ?>
+            <?php endif; ?>
           </div>
         </div>
       </div>
-      <script>
-      // Referrers
-      var referrers = document.getElementById('referrer-analytics-pie-referrers');
-      var referrerAnalyticsPie = new Chart(referrers, {
-        type: 'pie',
-        data: {
-          labels: <?php echo json_encode( $parsed['charts']['referrers']['labels'] ); ?>,
-          datasets: [{
-            data: [<?php echo implode( ',', $parsed['charts']['referrers']['data'] ); ?>],
-            backgroundColor: <?php echo json_encode( $parsed['charts']['referrers']['colors'] ); ?>,
-            borderWidth: 2,
-            borderColor: '#f1f1f1'
-          }],
-        },
-        options: {
-          legend: {
-            position: 'left',
-            fullWidth: false
-          }
-        }
-      });
-
-      // Types
-      var types = document.getElementById('referrer-analytics-pie-types');
-      var referrerAnalyticsPie = new Chart(types, {
-        type: 'pie',
-        data: {
-          labels: <?php echo json_encode( $parsed['charts']['type']['labels'] ); ?>,
-          datasets: [{
-            data: [<?php echo implode( ',', $parsed['charts']['type']['data'] ); ?>],
-            backgroundColor: <?php echo json_encode( $parsed['charts']['type']['colors'] ); ?>,
-            borderWidth: 2,
-            borderColor: '#f1f1f1'
-          }],
-        },
-        options: {
-          legend: {
-            position: 'left',
-            fullWidth: false
-          }
-        }
-      });
-      </script>
     <?php endif; ?>
 
     <h2><?php _e( 'Referrer Log', 'referrer-analytics' ); ?> <?php if ( $log_size ): ?><span style="font-size: 0.8rem; font-weight: normal; color: #666;">(<?php echo $log_size; ?>)</span><?php endif ?></h2>
@@ -145,7 +239,6 @@ function referrer_analytics_options_page() {
           <th><?php _e( 'User', 'referrer-analytics' ); ?></th>
           <th><?php _e( 'Referring URL', 'referrer-analytics' ); ?></th>
           <th><?php _e( 'Destination', 'referrer-analytics' ); ?></th>
-          <th><?php _e( 'Raw Host', 'referrer-analytics' ); ?></th>
           <th><?php _e( 'Host', 'referrer-analytics' ); ?></th>
           <th><?php _e( 'Type', 'referrer-analytics' ); ?></th>
           <th><?php _e( 'Name', 'referrer-analytics' ); ?></th>
@@ -186,13 +279,6 @@ function referrer_analytics_options_page() {
           <td>
             <?php if ( ! empty( $entry['destination'] ) ): ?>
               <a href="<?php echo esc_url( $entry['destination' ] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo $entry['destination']; ?></a>
-            <?php else: ?>
-              N/A
-            <?php endif; ?>
-          </td>
-          <td>
-            <?php if ( ! empty( $entry['raw'] ) ): ?>
-              <?php echo $entry['raw']; ?>
             <?php else: ?>
               N/A
             <?php endif; ?>
@@ -358,38 +444,41 @@ function referrer_analytics_referrers_cb( $args ) {
   <div class="referrer-ananlytics-referrer-header">
     <div>
       <label><?php _e( 'Host', 'referrer_analytics' ); ?></label>
-      <small><?php _e( 'The host name of the referrer (i.e. google.com, bing.com, etc.).', 'referrer_analytics' ); ?></small>
+      <small><?php _e( 'The host name of the referrer (i.e. www.google.com).', 'referrer_analytics' ); ?></small>
     </div>
     <div>
       <label><?php _e( 'Type', 'referrer_analytics' ); ?></label>
-      <small><?php _e( 'Define a type for the referrer (i.e. organic, backlink, ppc, etc.).', 'referrer_analytics' ); ?></small>
+      <small><?php _e( 'Define a type for the referrer (i.e. organic, backlink, etc.).', 'referrer_analytics' ); ?></small>
     </div>
     <div>
       <label><?php _e( 'Name', 'referrer_analytics' ); ?></label>
-      <small><?php _e( 'Human-readable name for the referrer (i.e. Google, Bing, Yahoo, etc.).', 'referrer_analytics' ); ?></small>
+      <small><?php _e( 'Readable name for the referrer (i.e. Google, Bing, etc.).', 'referrer_analytics' ); ?></small>
+    </div>
+    <div>
+      <label><?php _e( 'URL', 'referrer_analytics' ); ?></label>
+      <small><?php _e( 'Main URL for the referrer', 'referrer_analytics' ); ?></small>
     </div>
   </div>
   <?php
-
+  $cnt = 0;
   if ( $options['hosts'] ):
     foreach( $options['hosts'] as $key => $host ):
-      if ( ! $host['host'] || ! $host['type'] || ! $host['name'] ) {
-        unset( $options['referrers'][ $key ] );
+      if ( empty( $host['host'] ) ) {
         continue;
       }
       ?>
       <div class="referrer-analytics-referrer-option">
         <input
           type="text"
-          name="referrer_analytics_options[hosts][<?php echo $key; ?>][host]"
+          name="referrer_analytics_options[hosts][<?php echo $cnt; ?>][host]"
           value="<?php echo trim( $host['host'] ); ?>"
-          placeholder="<?php _e( 'Host (i.e. google.com)', 'referrer_analytics' ); ?>"
+          placeholder="<?php _e( 'Host (i.e. www.google.com)', 'referrer_analytics' ); ?>"
           class="referrer-analytics-input"
         />
 
         <input
           type="text"
-          name="referrer_analytics_options[hosts][<?php echo $key; ?>][type]"
+          name="referrer_analytics_options[hosts][<?php echo $cnt; ?>][type]"
           value="<?php echo trim( $host['type'] ); ?>"
           placeholder="<?php _e( 'Type (i.e. organic)', 'referrer_analytics' ); ?>"
           class="referrer-analytics-input"
@@ -397,30 +486,37 @@ function referrer_analytics_referrers_cb( $args ) {
 
         <input
           type="text"
-          name="referrer_analytics_options[hosts][<?php echo $key; ?>][name]"
+          name="referrer_analytics_options[hosts][<?php echo $cnt; ?>][name]"
           value="<?php echo trim( $host['name'] ); ?>"
           placeholder="<?php _e( 'Name (i.e. Google)', 'referrer_analytics' ); ?>"
           class="referrer-analytics-input"
         />
+
+        <input
+          type="url"
+          name="referrer_analytics_options[hosts][<?php echo $cnt; ?>][url]"
+          value="<?php echo trim( $host['url'] ); ?>"
+          placeholder="<?php _e( 'Name (i.e. https://www.google.com)', 'referrer_analytics' ); ?>"
+          class="referrer-analytics-input"
+        />
       </div>
       <?php
+      $cnt++;
     endforeach;
   endif;
-
-  $key++;
   ?>
   <div class="referrer-analytics-referrer-option">
     <input
       type="text"
-      name="referrer_analytics_options[hosts][<?php echo $key; ?>][host]"
+      name="referrer_analytics_options[hosts][<?php echo $cnt; ?>][host]"
       value=""
-      placeholder="<?php _e( 'Host (i.e. google.com)', 'referrer_analytics' ); ?>"
+      placeholder="<?php _e( 'Host (i.e. www.google.com)', 'referrer_analytics' ); ?>"
       class="referrer-analytics-input"
     />
 
     <input
       type="text"
-      name="referrer_analytics_options[hosts][<?php echo $key; ?>][type]"
+      name="referrer_analytics_options[hosts][<?php echo $cnt; ?>][type]"
       value=""
       placeholder="<?php _e( 'Type (i.e. organic)', 'referrer_analytics' ); ?>"
       class="referrer-analytics-input"
@@ -428,9 +524,17 @@ function referrer_analytics_referrers_cb( $args ) {
 
     <input
       type="text"
-      name="referrer_analytics_options[hosts][<?php echo $key; ?>][name]"
+      name="referrer_analytics_options[hosts][<?php echo $cnt; ?>][name]"
       value=""
       placeholder="<?php _e( 'Name (i.e. Google)', 'referrer_analytics' ); ?>"
+      class="referrer-analytics-input"
+    />
+
+    <input
+      type="url"
+      name="referrer_analytics_options[hosts][<?php echo $cnt; ?>][url]"
+      value=""
+      placeholder="<?php _e( 'Name (i.e. https://www.google.com)', 'referrer_analytics' ); ?>"
       class="referrer-analytics-input"
     />
   </div>
@@ -476,7 +580,7 @@ function referrer_analytics_field_cb( $args ) {
             class="<?php echo $args['class']; ?>"
             id="<?php echo esc_attr( $args['label_for'] . $key ); ?>"
             name="referrer_analytics_options[<?php echo esc_attr( $args['label_for'] ); ?>]<?php if( $args['multi'] ): ?>[<?php echo $key; ?>]<?php endif; ?>" value="<?php echo $key; ?>"
-            <?php if( $mutli && $key === $options[ $args['label_for'] ][ $key ] || ! $multi && $key === $options[ $args['label_for'] ] ): ?> checked="checked"<?php endif; ?> /> <?php echo $label; ?>
+            <?php if( $args['multi'] && $key === $options[ $args['label_for'] ][ $key ] || ! $args['multi'] && $key === $options[ $args['label_for'] ] ): ?> checked="checked"<?php endif; ?> /> <?php echo $label; ?>
         </label>
       <?php endforeach; ?>
       <p class="description"><?php echo $args['desc'] ?></p>

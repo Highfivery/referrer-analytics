@@ -4,7 +4,7 @@
  *
  * @package    ReferrerAnalytics
  * @subpackage WordPress
- * @since      1.1.0
+ * @since      1.2.0
  * @author     Ben Marshall
  * @copyright  2020 Ben Marshall
  * @license    GPL-2.0-or-later
@@ -12,8 +12,8 @@
  * @wordpress-plugin
  * Plugin Name:       Referrer Analytics
  * Plugin URI:        https://benmarshall.me/referrer-analytics
- * Description:       Track & store where you users came from for better reporting data in Google Analytics, conversion tracking & more. Make qualified decisions based on facts & figures, not conjecture.
- * Version:           1.1.0
+ * Description:       Track & store where your users came from for better reporting data in Google Analytics, conversion tracking & more. Make qualified decisions based on facts & figures, not conjecture.
+ * Version:           1.2.0
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Ben Marshall
@@ -49,12 +49,12 @@ add_action( 'init', function() {
   $current_url = referrer_analytics_current_url();
 
   // Check if it came from the same host, if so ignore
-  if ( ! $referrer || $current_url['host'] == $referrer['host']['raw'] ) { return; }
+  if ( ! $referrer || $current_url['host'] == $referrer['host'] ) { return; }
 
   // Check if referrer data should be stored in cookies
   if ( 'enabled' === $options['store_cookies'] ) {
     setcookie(
-      'referrer_analytics_referrer_destination',
+      'referrer-analytics-referrer_destination',
       $current_url['full'],
       current_time( 'timestamp' ) + ( $options['cookie_expiration'] * DAY_IN_SECONDS ),
       COOKIEPATH,
@@ -62,25 +62,13 @@ add_action( 'init', function() {
     );
 
     foreach( $referrer as $key => $value ) {
-      if ( is_array( $value ) ) {
-        foreach( $value as $k => $v ) {
-          setcookie(
-            'referrer_analytics_referrer_' . $k,
-            $v,
-            current_time( 'timestamp' ) + ( $options['cookie_expiration'] * DAY_IN_SECONDS ),
-            COOKIEPATH,
-            COOKIE_DOMAIN
-          );
-        }
-      } else {
-        setcookie(
-          'referrer_analytics_referrer_' . $key,
-          $value,
-          current_time( 'timestamp' ) + ( $options['cookie_expiration'] * DAY_IN_SECONDS ),
-          COOKIEPATH,
-          COOKIE_DOMAIN
-        );
-      }
+      setcookie(
+        'referrer-analytics-referrer_' . $key,
+        $value,
+        current_time( 'timestamp' ) + ( $options['cookie_expiration'] * DAY_IN_SECONDS ),
+        COOKIEPATH,
+        COOKIE_DOMAIN
+      );
     }
   }
 });
@@ -90,22 +78,22 @@ add_action( 'init', function() {
  */
 add_action( 'template_redirect', function() {
   // Only process on frontend pages & not after a redirect
-  if ( is_admin() || 1 == $_REQUEST['redirect'] ) { return; }
+  if ( is_admin() || (  ! empty( $_REQUEST['redirect'] ) && 1 == $_REQUEST['redirect'] ) ) { return; }
 
   global $wp;
   $options     = referrer_analytics_options();
   $current_url = referrer_analytics_current_url();
   $referrer    = referrer_analytics_get_referrer();
 
-  if ( 'enabled' === $options['logging'] && $current_url['host'] != $referrer['host']['raw'] ) {
+  if ( 'enabled' === $options['logging'] && $current_url['host'] != $referrer['host'] ) {
     referrer_analytics_log();
   }
 
   // Check if user should be redirected with UTM data
   if (
     'enabled' === $options['redirect_with_utm'] &&
-    ! empty( $referrer['host']['host'] ) &&
-    $current_url['host'] != $referrer['host']['raw']
+    ! empty( $referrer['host'] ) &&
+    $current_url['host'] != $referrer['host']
   ) {
     // Add the UTM parameters
     if ( ! empty( $current_url['query'] ) ) {
@@ -113,41 +101,40 @@ add_action( 'template_redirect', function() {
       if (
         empty( $current_url['query']['utm_source'] ) &&
         'ignore' != $options['utm_source'] &&
-        ! empty( $referrer['host'][ $options['utm_source'] ] )
+        ! empty( $referrer[ $options['utm_source'] ] )
       ) {
-        $current_url['query']['utm_source'] = $referrer['host'][ $options['utm_source'] ];
+        $current_url['query']['utm_source'] = $referrer[ $options['utm_source'] ];
       }
 
       // Check if utm_medium is already provided, if so, ignore the referrer.
       if (
         empty( $current_url['query']['utm_medium'] ) &&
         'ignore' != $options['utm_medium'] &&
-        ! empty( $referrer['host'][ $options['utm_medium'] ] )
+        ! empty( $referrer[ $options['utm_medium'] ] )
       ) {
-        $current_url['query']['utm_medium'] = $referrer['host'][ $options['utm_medium'] ];
+        $current_url['query']['utm_medium'] = $referrer[ $options['utm_medium'] ];
       }
 
       // Check if utm_campaign is already provided, if so, ignore the referrer.
       if (
         empty( $current_url['query']['utm_campaign'] ) &&
         'ignore' != $options['utm_campaign'] &&
-        ! empty( $referrer['host'][ $options['utm_campaign'] ] )
+        ! empty( $referrer[ $options['utm_campaign'] ] )
       ) {
-        $current_url['query']['utm_campaign'] = $referrer['host'][ $options['utm_campaign'] ];
+        $current_url['query']['utm_campaign'] = $referrer[ $options['utm_campaign'] ];
       }
     } else {
-
       $current_url['query'] = [];
-      if ( 'ignore' != 'utm_source' && ! empty( $referrer['host'][ $options['utm_source'] ] ) ) {
-        $current_url['query']['utm_source'] = $referrer['host'][ $options['utm_source'] ];
+      if ( 'ignore' != 'utm_source' && ! empty( $referrer[ $options['utm_source'] ] ) ) {
+        $current_url['query']['utm_source'] = $referrer[ $options['utm_source'] ];
       }
 
-      if ( 'ignore' != 'utm_medium' && ! empty( $referrer['host'][ $options['utm_medium'] ] ) ) {
-        $current_url['query']['utm_medium'] = $referrer['host'][ $options['utm_medium'] ];
+      if ( 'ignore' != 'utm_medium' && ! empty( $referrer[ $options['utm_medium'] ] ) ) {
+        $current_url['query']['utm_medium'] = $referrer[ $options['utm_medium'] ];
       }
 
-      if ( 'ignore' != 'utm_campaign' && ! empty( $referrer['host'][ $options['utm_campaign'] ] ) ) {
-        $current_url['query']['utm_campaign'] = $referrer['host'][ $options['utm_campaign'] ];
+      if ( 'ignore' != 'utm_campaign' && ! empty( $referrer[ $options['utm_campaign'] ] ) ) {
+        $current_url['query']['utm_campaign'] = $referrer[ $options['utm_campaign'] ];
       }
     }
 
@@ -180,79 +167,83 @@ if ( ! function_exists( 'referrer_analytics_get_referrer' ) ) {
     $referrer = [
       'url'    => false,
       'scheme' => false,
-      'host'   => [
-        'raw' => false
-      ],
+      'host'   => false,
       'path'   => false
     ];
 
     // Get the basic referrer info
     $url = parse_url( $referrer_url );
 
-    $referrer['url']         = $referrer_url;
-    $referrer['scheme']      = ! empty( $url['scheme'] ) ? $url['scheme'] : false;
-    $referrer['host']['raw'] = ! empty( $url['host'] ) ? $url['host'] : false;
-    $referrer['path']        = ! empty( $url['path'] ) ? $url['path'] : false;
+    $referrer['url']    = $referrer_url;
+    $referrer['scheme'] = ! empty( $url['scheme'] ) ? $url['scheme'] : false;
+    $referrer['host']   = ! empty( $url['host'] ) ? $url['host'] : false;
+    $referrer['path']   = ! empty( $url['path'] ) ? $url['path'] : false;
 
     // Get the host information
-    $hosts = referrer_analytics_referrers();
+    $hosts = referrer_analytics_get_hosts();
 
-    // If no defined referrer hosts, check if raw host should still be tracked
-    if ( ! $hosts && 'enabled' === $options['track_all_referrers'] ) {
-      $referrer['host']['host'] = $referrer['host']['raw'];
-    } else {
-      $found = false;
-      foreach( $hosts as $key => $host ) {
-        if ( false !== strpos( $referrer['host']['raw'], $host['host'] ) ) {
-          $referrer['host']['host'] = $host['host'];
-          $referrer['host'] = array_merge( $referrer['host'], $host );
-          $found = true;
-          break;
-        }
-      }
-
-      // Could not match with a defined host, check if raw host should still be tracked
-      if ( ! $found && 'enabled' === $options['track_all_referrers'] ) {
-        $referrer['host']['host'] = $referrer['host']['raw'];
-      } elseif ( ! $found ) {
-        return false;
+    $found = false;
+    foreach( $hosts as $host_key => $host ) {
+      if ( $referrer['host'] === $host['host'] ) {
+        $referrer = array_merge( $referrer, $host );
+        $found = true;
+        break;
       }
     }
 
-    return $referrer;
+    // Could not match with a defined host, check if raw host should still be tracked
+    if (
+      $found ||
+      ! $found && 'enabled' === $options['track_all_referrers'] ) {
+      return $referrer;
+    }
+
+    return false;
   }
 }
 
 /**
  * Returns an array of host types.
  */
-if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
-  function referrer_analytics_referrers() {
+if ( ! function_exists( 'referrer_analytics_get_hosts' ) ) {
+  function referrer_analytics_get_hosts() {
     $options = referrer_analytics_options();
+    $hosts   = [];
 
     // Check if all hosts should be tracked, if so add known
     if ( 'enabled' === $options['track_all_referrers'] ) {
-      $options['hosts'] = referrer_analytics_get_known();
+      $known_hosts = referrer_analytics_get_known();
     }
 
     // Check to make sure at least one host is available
-    if ( ! $options['hosts'] ) {
+    if ( ! $options['hosts'] && ! $known_hosts ) {
       return false;
     }
 
-    // Clean up any empty records
-    $has_hosts = false;
-    foreach( $options['hosts'] as $key => $value ) {
-      if ( ! empty( $value['host'] ) ) {
-        $has_hosts = true;
-      } else {
-        unset( $options['hosts'][ $key ] );
+    if( ! empty( $known_hosts ) ) {
+      // Add known hosts to hosts list
+      foreach( $known_hosts as $key => $host ) {
+        $hosts[ $host['host'] ] = $host;
       }
     }
 
-    if ( ! $has_hosts ) { return false; }
+    if ( $options['hosts'] ) {
+      // Override/add any pre-defined hosts
+      foreach( $options['hosts'] as $key => $host ) {
+        $hosts[ $host['host'] ] = $host;
+      }
+    }
 
-    return $options['hosts'];
+    // Clean up any empty records
+    foreach( $hosts as $key => $host ) {
+      if ( empty( $host['host'] ) ) {
+        unset( $hosts[ $key ] );
+      }
+    }
+
+    if ( ! $hosts ) { return false; }
+
+    return $hosts;
   }
 }
 
@@ -305,18 +296,13 @@ if ( ! function_exists( 'referrer_analytics_log' ) ) {
     $log = [ 'date' => current_time( 'mysql' ) ];
 
     $referrer = referrer_analytics_get_referrer();
+
     if ( ! $referrer ) { return false; }
 
     $current_url = referrer_analytics_current_url();
 
     foreach( $referrer as $key => $value ) {
-      if ( is_array( $value ) ) {
-        foreach( $value as $k => $v ) {
-          $log[ $k ] = $v;
-        }
-      } else {
-        $log[ $key ] = $value;
-      }
+      $log[ $key ] = $value;
     }
 
     $log['ip']          = referrer_analytics_get_ip();
@@ -409,11 +395,16 @@ if ( ! function_exists( 'referrer_analytics_get_log' ) ) {
 /**
  * Parsed log
  */
-if ( ! function_exists( 'referrer_analytics_parsed_log' ) ) {
-  function referrer_analytics_parsed_log( $log ) {
+if ( ! function_exists( 'referrer_analytics_parse_log' ) ) {
+  function referrer_analytics_parse_log( $log ) {
     if ( ! $log ) { return false; }
 
     $parsed = [
+      'totals' => [
+        'referrers'    => [],
+        'types'        => [],
+        'destinations' => []
+      ],
       'charts' => [
         'referrers' => [
           'labels' => [],
@@ -435,15 +426,38 @@ if ( ! function_exists( 'referrer_analytics_parsed_log' ) ) {
         $referrer_key = 'name';
       } elseif( ! empty( $entry['host'] ) ) {
         $referrer_key = 'host';
-      } elseif( ! empty( $entry['raw'] ) ) {
-        $referrer_key = 'raw';
       }
+
+      if ( ! $referrer_key ) { continue; }
 
       if ( empty( $entry['type'] ) ) {
         $entry['type'] = 'N/A';
       }
 
-      if ( ! $referrer_key ) { continue; }
+      // Referrer totals
+      if ( empty( $parsed['totals']['referrers'][ $entry[ $referrer_key ] ] ) ) {
+        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['count'] = 1;
+        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['url']   = ! empty( $entry['url'] ) ? $entry['url'] : false;
+        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['flag']  = ! empty( $entry['flag'] ) ? $entry['flag'] : false;
+        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['name']  = $entry[ $referrer_key ];
+        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['type']  = $entry['type'];
+      } else {
+        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['count']++;
+      }
+
+      // Type totals
+      if ( empty( $parsed['totals']['types'][ $entry['type'] ] ) ) {
+        $parsed['totals']['types'][ $entry['type'] ] = 1;
+      } else {
+        $parsed['totals']['types'][ $entry['type'] ]++;
+      }
+
+      // Destination totals
+      if ( empty( $parsed['totals']['destinations'][ $entry['destination'] ] ) ) {
+        $parsed['totals']['destinations'][ $entry['destination'] ] = 1;
+      } else {
+        $parsed['totals']['destinations'][ $entry['destination'] ]++;
+      }
 
       // Set labels
       if ( ! in_array( $entry[ $referrer_key ], $parsed['charts']['referrers']['labels'] ) ) {
@@ -508,7 +522,7 @@ if ( ! function_exists( 'referrer_analytics_bytes' ) ) {
 if ( ! function_exists( 'referrer_analytics_sync_log' ) ) {
   function referrer_analytics_sync_log() {
     $log   = referrer_analytics_get_log();
-    $hosts = referrer_analytics_referrers();
+    $hosts = referrer_analytics_get_hosts();
     $file  = referrer_analytics_get_log_file();
 
     if ( ! $hosts ) { return false; }
@@ -518,10 +532,12 @@ if ( ! function_exists( 'referrer_analytics_sync_log' ) ) {
       $new_entry = $entry;
 
       foreach( $hosts as $k => $host ) {
-        if ( false !== strpos( $entry['raw'], $host['host'] ) ) {
+        if ( $entry['host'] == $host['host'] ) {
           $new_entry['host'] = $host['host'];
           $new_entry['type'] = $host['type'];
           $new_entry['name'] = $host['name'];
+          $new_entry['flag'] = ! empty( $host['flag'] ) ? $host['flag'] : false;
+          $new_entry['url']  = ! empty( $host['url'] ) ? $host['url'] : false;
         }
       }
 
@@ -540,58 +556,42 @@ if ( ! function_exists( 'referrer_analytics_sync_log' ) ) {
 if ( ! function_exists( 'referrer_analytics_get_known' ) ) {
   function referrer_analytics_get_known() {
     return [
-      // Search engines
-      'google.com'         => [ 'host' => 'google.com', 'type' => 'organic', 'name' => 'Google' ],
-      'www.google.com'     => [ 'host' => 'google.com', 'type' => 'organic', 'name' => 'Google' ],
-      'google.dk'          => [ 'host' => 'google.dk', 'type' => 'organic', 'name' => 'Google (DK)' ],
-      'www.google.dk'      => [ 'host' => 'google.dk', 'type' => 'organic', 'name' => 'Google (DK)' ],
-      'google.es'          => [ 'host' => 'google.es', 'type' => 'organic', 'name' => 'Google (ES)' ],
-      'www.google.es'      => [ 'host' => 'google.es', 'type' => 'organic', 'name' => 'Google (ES)' ],
-      'google.fr'          => [ 'host' => 'google.fr', 'type' => 'organic', 'name' => 'Google (FR)' ],
-      'www.google.fr'      => [ 'host' => 'google.fr', 'type' => 'organic', 'name' => 'Google (FR)' ],
-      'google.ro'          => [ 'host' => 'google.ro', 'type' => 'organic', 'name' => 'Google (RO)' ],
-      'www.google.ro'      => [ 'host' => 'google.ro', 'type' => 'organic', 'name' => 'Google (RO)' ],
-      'google.ru'          => [ 'host' => 'google.ru', 'type' => 'organic', 'name' => 'Google (RU)' ],
-      'www.google.ru'      => [ 'host' => 'google.ru', 'type' => 'organic', 'name' => 'Google (RU)' ],
-      'google.cl'          => [ 'host' => 'google.cl', 'type' => 'organic', 'name' => 'Google (CL)' ],
-      'www.google.cl'      => [ 'host' => 'google.cl', 'type' => 'organic', 'name' => 'Google (CL)' ],
-      'google.ca'          => [ 'host' => 'google.ca', 'type' => 'organic', 'name' => 'Google (CA)' ],
-      'www.google.ca'      => [ 'host' => 'google.ca', 'type' => 'organic', 'name' => 'Google (CA)' ],
-      'www.google.co.uk'   => [ 'host' => 'google.co.uk', 'type' => 'organic', 'name' => 'Google (UK)' ],
-      'google.co.uk'       => [ 'host' => 'google.co.in', 'type' => 'organic', 'name' => 'Google (UK)' ],
-      'www.google.co.in'   => [ 'host' => 'google.co.in', 'type' => 'organic', 'name' => 'Google (IN)' ],
-      'google.co.in'       => [ 'host' => 'google.co.uk', 'type' => 'organic', 'name' => 'Google (IN)' ],
-      'www.google.co.ch'   => [ 'host' => 'google.co.ch', 'type' => 'organic', 'name' => 'Google (CH)' ],
-      'google.co.ch'       => [ 'host' => 'google.co.ch', 'type' => 'organic', 'name' => 'Google (CH)' ],
-      'www.google.ch'      => [ 'host' => 'google.ch', 'type' => 'organic', 'name' => 'Google (CH)' ],
-      'google.ch'          => [ 'host' => 'google.ch', 'type' => 'organic', 'name' => 'Google (CH)' ],
-      'www.google.co.kr'   => [ 'host' => 'google.co.kr', 'type' => 'organic', 'name' => 'Google (KR)' ],
-      'google.co.kr'       => [ 'host' => 'google.co.kr', 'type' => 'organic', 'name' => 'Google (KR)' ],
-      'www.google.co.th'   => [ 'host' => 'google.co.th', 'type' => 'organic', 'name' => 'Google (TH)' ],
-      'google.co.th'       => [ 'host' => 'google.co.th', 'type' => 'organic', 'name' => 'Google (TH)' ],
-      'bing.com'           => [ 'host' => 'bing.com', 'type' => 'organic', 'name' => 'Bing' ],
-      'www.bing.com'       => [ 'host' => 'bing.com', 'type' => 'organic', 'name' => 'Bing' ],
-      'cn.bing.com'        => [ 'host' => 'bing.com', 'type' => 'organic', 'name' => 'Bing (CN)' ],
-      'yahoo.com'          => [ 'host' => 'yahoo.com', 'type' => 'organic', 'name' => 'Yahoo' ],
-      'www.yahoo.com'      => [ 'host' => 'yahoo.com', 'type' => 'organic', 'name' => 'Yahoo' ],
-      'search.yahoo.com'   => [ 'host' => 'yahoo.com', 'type' => 'organic', 'name' => 'Yahoo' ],
-      'duckduckgo.com'     => [ 'host' => 'duckduckgo.com', 'type' => 'organic', 'name' => 'DuckDuckGo' ],
-      'www.duckduckgo.com' => [ 'host' => 'duckduckgo.com', 'type' => 'organic', 'name' => 'DuckDuckGo' ],
-      'qwant.com'          => [ 'host' => 'qwant.com', 'type' => 'organic', 'name' => 'Qwant' ],
-      'www.qwant.com'      => [ 'host' => 'qwant.com', 'type' => 'organic', 'name' => 'Qwant' ],
-      'ecosia.org'         => [ 'host' => 'ecosia.org', 'type' => 'organic', 'name' => 'Ecosia' ],
-      'www.ecosia.org'     => [ 'host' => 'ecosia.org', 'type' => 'organic', 'name' => 'Ecosia' ],
-      'baidu.org'          => [ 'host' => 'baidu.com', 'type' => 'organic', 'name' => 'Ecosia' ],
-      'www.baidu.org'      => [ 'host' => 'baidu.com', 'type' => 'organic', 'name' => 'Baidu' ],
+      // Google
+      [ 'host' => 'www.google.com', 'type' => 'organic', 'name' => 'Google', 'url' => 'https://www.google.com/' ],
+      [ 'host' => 'www.google.ru', 'type' => 'organic', 'name' => 'Google (Russia)', 'url' => 'https://www.google.ru/' ],
+      [ 'host' => 'www.google.fr', 'type' => 'organic', 'name' => 'Google (France)', 'url' => 'https://www.google.fr/' ],
+      [ 'host' => 'www.google.in', 'type' => 'organic', 'name' => 'Google (India)', 'url' => 'https://www.google.in/' ],
+      [ 'host' => 'www.google.co.uk', 'type' => 'organic', 'name' => 'Google (United Kingdom)', 'url' => 'https://www.google.co.uk/' ],
+      [ 'host' => 'www.google.ch', 'type' => 'organic', 'name' => 'Google (Switzerland)', 'url' => 'https://www.google.ch/' ],
+      [ 'host' => 'www.google.co.kr', 'type' => 'organic', 'name' => 'Google (South Korea)', 'url' => 'https://www.google.co.kr/' ],
+      [ 'host' => 'www.google.co.th', 'type' => 'organic', 'name' => 'Google (Thailand)', 'url' => 'https://www.google.co.th/' ],
+      [ 'host' => 'www.google.com.eg', 'type' => 'organic', 'name' => 'Google (Egypt)', 'url' => 'https://www.google.com.eg/' ],
+      [ 'host' => 'www.google.ro', 'type' => 'organic', 'name' => 'Google (Romania)', 'url' => 'https://www.google.ro/' ],
 
-      // Websites
-      'css-tricks.com'  => [ 'host' => 'css-tricks.com', 'type' => 'backlink', 'name' => 'CSS-Tricks' ],
-      'benmarshall.me' => [ 'host' => 'benmarshall.me', 'type' => 'backlink', 'name' => 'Ben Marshall' ],
-      'cdpn.io'        => [ 'host' => 'cdpn.io', 'type' => 'backlink', 'name' => 'CodePen' ],
+      // Bing
+      [ 'host' => 'www.bing.com', 'type' => 'organic', 'name' => 'Bing', 'url' => 'https://www.bing.com/' ],
+      [ 'host' => 'cn.bing.com', 'type' => 'organic', 'name' => 'China', 'url' => 'https://www.bing.com/?mkt=zh-CN' ],
 
-      // Social media
-      'facebook.com'   => [ 'host' => 'facebook.com', 'type' => 'social', 'name' => 'Facebook' ],
-      'l.facebook.com' => [ 'host' => 'facebook.com', 'type' => 'social', 'name' => 'Facebook' ],
+      // Yahoo
+      [ 'host' => 'r.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo', 'url' => 'https://www.yahoo.com/' ],
+      [ 'host' => 'search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo', 'url' => 'https://www.yahoo.com/' ],
+      [ 'host' => 'fr.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (France)', 'url' => 'https://fr.search.yahoo.com/' ],
+
+      // Other search engines
+      [ 'host' => 'duckduckgo.com', 'type' => 'organic', 'name' => 'DuckDuckGo', 'url' => 'https://duckduckgo.com/' ],
+      [ 'host' => 'baidu.com', 'type' => 'organic', 'name' => 'Baidu', 'url' => 'http://www.baidu.com/' ],
+      [ 'host' => 'www.ecosia.org', 'type' => 'organic', 'name' => 'Ecosia', 'url' => 'https://www.ecosia.org/' ],
+      [ 'host' => 'www.qwant.com', 'type' => 'organic', 'name' => 'Qwant', 'url' => 'https://www.qwant.com/' ],
+
+      // Others
+      [ 'host' => 'site.ru', 'type' => 'bot', 'name' => 'site.ru', 'flag' => true ],
+      [ 'host' => 'css-tricks.com', 'type' => 'backlink', 'name' => 'CSS-Tricks', 'url' => 'https://css-tricks.com/' ],
+      [ 'host' => 'lurkmore.to', 'type' => 'backlink', 'name' => 'Lurkmore', 'url' => 'https://lurkmore.to/' ],
+      [ 'host' => 'drupalsun.com', 'type' => 'backlink', 'name' => 'Drupal Sun', 'url' => 'https://drupalsun.com/' ],
+      [ 'host' => 'cdpn.io', 'type' => 'backlink', 'name' => 'CodePen', 'url' => 'https://codepen.io/' ],
+      [ 'host' => 'amzn.to', 'type' => 'backlink', 'name' => 'Amazon', 'url' => 'https://www.amazon.com/' ],
+      [ 'host' => 'jobsnearme.online', 'type' => 'backlink', 'name' => 'Jobs Near Me', 'url' => 'https://jobsnearme.online/' ],
+      [ 'host' => 'www.entermedia.com', 'type' => 'backlink', 'name' => 'Entermedia, LLC.', 'url' => 'https://www.entermedia.com/' ],
     ];
   }
 }
