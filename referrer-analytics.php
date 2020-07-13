@@ -4,7 +4,7 @@
  *
  * @package    ReferrerAnalytics
  * @subpackage WordPress
- * @since      1.0.0
+ * @since      1.1.0
  * @author     Ben Marshall
  * @copyright  2020 Ben Marshall
  * @license    GPL-2.0-or-later
@@ -13,7 +13,7 @@
  * Plugin Name:       Referrer Analytics
  * Plugin URI:        https://benmarshall.me/referrer-analytics
  * Description:       Track & store where you users came from for better reporting data in Google Analytics, conversion tracking & more. Make qualified decisions based on facts & figures, not conjecture.
- * Version:           1.0.0
+ * Version:           1.2.0
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Ben Marshall
@@ -302,9 +302,6 @@ if ( ! function_exists( 'referrer_analytics_current_url' ) ) {
  */
 if ( ! function_exists( 'referrer_analytics_log' ) ) {
   function referrer_analytics_log() {
-    $wp_upload_dir = wp_upload_dir();
-    $wp_upload_dir = $wp_upload_dir['basedir'];
-
     $log = [ 'date' => current_time( 'mysql' ) ];
 
     $referrer = referrer_analytics_get_referrer();
@@ -326,8 +323,8 @@ if ( ! function_exists( 'referrer_analytics_log' ) ) {
     $log['userid']      = get_current_user_id();
     $log['destination'] = $current_url['full'];
 
-    $file = fopen( $wp_upload_dir . '/referrer-analytics.log', 'a' );
-    fwrite( $file, "\n" . json_encode( $log ) );
+    $file = fopen( referrer_analytics_get_log_file(), 'a' );
+    fwrite( $file, json_encode( $log ) . "\n" );
     fclose( $file );
   }
 }
@@ -354,10 +351,7 @@ if ( ! function_exists( 'referrer_analytics_get_ip' ) ) {
  */
 if ( ! function_exists( 'referrer_analytics_log_size' ) ) {
   function referrer_analytics_log_size() {
-    $wp_upload_dir = wp_upload_dir();
-    $wp_upload_dir = $wp_upload_dir['basedir'];
-
-    $file = $wp_upload_dir . '/referrer-analytics.log';
+    $file = referrer_analytics_get_log_file();
 
     if ( file_exists( $file ) ) {
       return referrer_analytics_bytes( filesize( $file ) );
@@ -372,11 +366,19 @@ if ( ! function_exists( 'referrer_analytics_log_size' ) ) {
  */
 if ( ! function_exists( 'referrer_analytics_delete_log' ) ) {
   function referrer_analytics_delete_log() {
+    wp_delete_file( referrer_analytics_get_log_file() );
+  }
+}
+
+/**
+ * Get log file
+ */
+if ( ! function_exists( 'referrer_analytics_get_log_file' ) ) {
+  function referrer_analytics_get_log_file() {
     $wp_upload_dir = wp_upload_dir();
     $wp_upload_dir = $wp_upload_dir['basedir'];
 
-    $file = $wp_upload_dir . '/referrer-analytics.log';
-    wp_delete_file( $file );
+    return $wp_upload_dir . '/referrer-analytics.log';
   }
 }
 
@@ -387,10 +389,7 @@ if ( ! function_exists( 'referrer_analytics_get_log' ) ) {
   function referrer_analytics_get_log() {
     $log = [];
 
-    $wp_upload_dir = wp_upload_dir();
-    $wp_upload_dir = $wp_upload_dir['basedir'];
-
-    $file = $wp_upload_dir . '/referrer-analytics.log';
+    $file = referrer_analytics_get_log_file();
 
     if ( file_exists( $file ) ) {
       $contents = file_get_contents( $file );
@@ -504,6 +503,38 @@ if ( ! function_exists( 'referrer_analytics_bytes' ) ) {
 }
 
 /**
+ * Sync log with known referrers
+ */
+if ( ! function_exists( 'referrer_analytics_sync_log' ) ) {
+  function referrer_analytics_sync_log() {
+    $log   = referrer_analytics_get_log();
+    $hosts = referrer_analytics_referrers();
+    $file  = referrer_analytics_get_log_file();
+
+    if ( ! $hosts ) { return false; }
+
+    $new_log = '';
+    foreach( $log as $key => $entry ) {
+      $new_entry = $entry;
+
+      foreach( $hosts as $k => $host ) {
+        if ( false !== strpos( $entry['raw'], $host['host'] ) ) {
+          $new_entry['host'] = $host['host'];
+          $new_entry['type'] = $host['type'];
+          $new_entry['name'] = $host['name'];
+        }
+      }
+
+      $new_log .= json_encode( $new_entry ) . "\n";
+    }
+
+    $file = fopen( $file, 'w' );
+    fwrite( $file, $new_log );
+    fclose( $file );
+  }
+}
+
+/**
  * Get known hosts
  */
 if ( ! function_exists( 'referrer_analytics_get_known' ) ) {
@@ -518,10 +549,26 @@ if ( ! function_exists( 'referrer_analytics_get_known' ) ) {
       'www.google.es'      => [ 'host' => 'google.es', 'type' => 'organic', 'name' => 'Google (ES)' ],
       'google.fr'          => [ 'host' => 'google.fr', 'type' => 'organic', 'name' => 'Google (FR)' ],
       'www.google.fr'      => [ 'host' => 'google.fr', 'type' => 'organic', 'name' => 'Google (FR)' ],
+      'google.ro'          => [ 'host' => 'google.ro', 'type' => 'organic', 'name' => 'Google (RO)' ],
+      'www.google.ro'      => [ 'host' => 'google.ro', 'type' => 'organic', 'name' => 'Google (RO)' ],
+      'google.ru'          => [ 'host' => 'google.ru', 'type' => 'organic', 'name' => 'Google (RU)' ],
+      'www.google.ru'      => [ 'host' => 'google.ru', 'type' => 'organic', 'name' => 'Google (RU)' ],
       'google.cl'          => [ 'host' => 'google.cl', 'type' => 'organic', 'name' => 'Google (CL)' ],
       'www.google.cl'      => [ 'host' => 'google.cl', 'type' => 'organic', 'name' => 'Google (CL)' ],
       'google.ca'          => [ 'host' => 'google.ca', 'type' => 'organic', 'name' => 'Google (CA)' ],
       'www.google.ca'      => [ 'host' => 'google.ca', 'type' => 'organic', 'name' => 'Google (CA)' ],
+      'www.google.co.uk'   => [ 'host' => 'google.co.uk', 'type' => 'organic', 'name' => 'Google (UK)' ],
+      'google.co.uk'       => [ 'host' => 'google.co.in', 'type' => 'organic', 'name' => 'Google (UK)' ],
+      'www.google.co.in'   => [ 'host' => 'google.co.in', 'type' => 'organic', 'name' => 'Google (IN)' ],
+      'google.co.in'       => [ 'host' => 'google.co.uk', 'type' => 'organic', 'name' => 'Google (IN)' ],
+      'www.google.co.ch'   => [ 'host' => 'google.co.ch', 'type' => 'organic', 'name' => 'Google (CH)' ],
+      'google.co.ch'       => [ 'host' => 'google.co.ch', 'type' => 'organic', 'name' => 'Google (CH)' ],
+      'www.google.ch'      => [ 'host' => 'google.ch', 'type' => 'organic', 'name' => 'Google (CH)' ],
+      'google.ch'          => [ 'host' => 'google.ch', 'type' => 'organic', 'name' => 'Google (CH)' ],
+      'www.google.co.kr'   => [ 'host' => 'google.co.kr', 'type' => 'organic', 'name' => 'Google (KR)' ],
+      'google.co.kr'       => [ 'host' => 'google.co.kr', 'type' => 'organic', 'name' => 'Google (KR)' ],
+      'www.google.co.th'   => [ 'host' => 'google.co.th', 'type' => 'organic', 'name' => 'Google (TH)' ],
+      'google.co.th'       => [ 'host' => 'google.co.th', 'type' => 'organic', 'name' => 'Google (TH)' ],
       'bing.com'           => [ 'host' => 'bing.com', 'type' => 'organic', 'name' => 'Bing' ],
       'www.bing.com'       => [ 'host' => 'bing.com', 'type' => 'organic', 'name' => 'Bing' ],
       'cn.bing.com'        => [ 'host' => 'bing.com', 'type' => 'organic', 'name' => 'Bing (CN)' ],
@@ -532,11 +579,13 @@ if ( ! function_exists( 'referrer_analytics_get_known' ) ) {
       'www.duckduckgo.com' => [ 'host' => 'duckduckgo.com', 'type' => 'organic', 'name' => 'DuckDuckGo' ],
       'qwant.com'          => [ 'host' => 'qwant.com', 'type' => 'organic', 'name' => 'Qwant' ],
       'www.qwant.com'      => [ 'host' => 'qwant.com', 'type' => 'organic', 'name' => 'Qwant' ],
-      'ecosia.com'         => [ 'host' => 'ecosia.com', 'type' => 'organic', 'name' => 'Ecosia' ],
-      'www.ecosia.com'     => [ 'host' => 'ecosia.com', 'type' => 'organic', 'name' => 'Ecosia' ],
+      'ecosia.org'         => [ 'host' => 'ecosia.org', 'type' => 'organic', 'name' => 'Ecosia' ],
+      'www.ecosia.org'     => [ 'host' => 'ecosia.org', 'type' => 'organic', 'name' => 'Ecosia' ],
+      'baidu.org'          => [ 'host' => 'baidu.com', 'type' => 'organic', 'name' => 'Ecosia' ],
+      'www.baidu.org'      => [ 'host' => 'baidu.com', 'type' => 'organic', 'name' => 'Baidu' ],
 
       // Websites
-      'csstricks.com'  => [ 'host' => 'csstricks.com', 'type' => 'backlink', 'name' => 'CSS-Tricks' ],
+      'css-tricks.com'  => [ 'host' => 'css-tricks.com', 'type' => 'backlink', 'name' => 'CSS-Tricks' ],
       'benmarshall.me' => [ 'host' => 'benmarshall.me', 'type' => 'backlink', 'name' => 'Ben Marshall' ],
       'cdpn.io'        => [ 'host' => 'cdpn.io', 'type' => 'backlink', 'name' => 'CodePen' ],
 

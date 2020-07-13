@@ -47,78 +47,97 @@ function referrer_analytics_options_page() {
     exit();
   }
 
+  referrer_analytics_sync_log();
+
   $log = referrer_analytics_get_log();
   $log = array_reverse( $log );
 
-  $log_limit = 100;
-  $log_size  = referrer_analytics_log_size();
-  $known     = referrer_analytics_get_known();
-  $parsed    = referrer_analytics_parsed_log( $log );
+  $known  = referrer_analytics_get_known();
+  $parsed = referrer_analytics_parsed_log( $log );
+
+  $log_limit      = 20;
+  $log_size       = referrer_analytics_log_size();
+  $total_pages    = ceil( count( $log  ) / $log_limit );
+  $current_page   = isset( $_GET['pagenum'] ) ? absint( $_GET['pagenum'] ) : 1;
+  $starting_index = ( $current_page * $log_limit ) - $log_limit + 1;
+  $ending_index   = ( $current_page * $log_limit );
   ?>
   <div class="wrap">
     <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
-    <h2><?php _e( 'Statistics', 'referrer-analytics' ); ?></h2>
-    <div class="referrer-analytics-boxes">
-      <div class="referrer-analytics-box">
-        <h3><?php _e( 'Referrers', 'referrer-analytics' ); ?></h3>
-        <div class="inside">
-          <canvas id="referrer-analytics-pie-referrers"></canvas>
+    <?php if ( $current_page === 1 ): ?>
+      <h2><?php _e( 'Statistics', 'referrer-analytics' ); ?></h2>
+      <div class="referrer-analytics-boxes">
+        <div class="referrer-analytics-box">
+          <h3><?php _e( 'Referrers', 'referrer-analytics' ); ?></h3>
+          <div class="inside">
+            <canvas id="referrer-analytics-pie-referrers"></canvas>
+          </div>
+        </div>
+        <div class="referrer-analytics-box">
+          <h3><?php _e( 'Referrer Types', 'referrer-analytics' ); ?></h3>
+          <div class="inside">
+            <canvas id="referrer-analytics-pie-types"></canvas>
+          </div>
         </div>
       </div>
-      <div class="referrer-analytics-box">
-        <h3><?php _e( 'Referrer Types', 'referrer-analytics' ); ?></h3>
-        <div class="inside">
-          <canvas id="referrer-analytics-pie-types"></canvas>
-        </div>
+      <script>
+      // Referrers
+      var referrers = document.getElementById('referrer-analytics-pie-referrers');
+      var referrerAnalyticsPie = new Chart(referrers, {
+        type: 'pie',
+        data: {
+          labels: <?php echo json_encode( $parsed['charts']['referrers']['labels'] ); ?>,
+          datasets: [{
+            data: [<?php echo implode( ',', $parsed['charts']['referrers']['data'] ); ?>],
+            backgroundColor: <?php echo json_encode( $parsed['charts']['referrers']['colors'] ); ?>,
+            borderWidth: 2,
+            borderColor: '#f1f1f1'
+          }],
+        },
+        options: {
+          legend: {
+            position: 'left',
+            fullWidth: false
+          }
+        }
+      });
+
+      // Types
+      var types = document.getElementById('referrer-analytics-pie-types');
+      var referrerAnalyticsPie = new Chart(types, {
+        type: 'pie',
+        data: {
+          labels: <?php echo json_encode( $parsed['charts']['type']['labels'] ); ?>,
+          datasets: [{
+            data: [<?php echo implode( ',', $parsed['charts']['type']['data'] ); ?>],
+            backgroundColor: <?php echo json_encode( $parsed['charts']['type']['colors'] ); ?>,
+            borderWidth: 2,
+            borderColor: '#f1f1f1'
+          }],
+        },
+        options: {
+          legend: {
+            position: 'left',
+            fullWidth: false
+          }
+        }
+      });
+      </script>
+    <?php endif; ?>
+
+    <h2><?php _e( 'Referrer Log', 'referrer-analytics' ); ?> <?php if ( $log_size ): ?><span style="font-size: 0.8rem; font-weight: normal; color: #666;">(<?php echo $log_size; ?>)</span><?php endif ?></h2>
+
+    <div class="referrer-analytics-log-table-header">
+      <div class="referrer-analytics-log-table-header-headline">
+        <?php _e( 'Showing', 'referrer-analytics' ); ?> <?php echo $starting_index; ?> - <?php echo $ending_index; ?> <?php _e( 'of', 'referrer-analytics' ); ?> <?php echo count( $log  ); ?>
+      </div>
+      <div class="referrer-analytics-log-table-header-actions">
+        <a href="<?php echo admin_url( 'options-general.php?page=referrer-analytics-log&delete=log' ); ?>" class="button button-primary"><?php _e( 'Delete Log', 'referrer-analytics' ); ?></a>
       </div>
     </div>
-    <script>
-    // Referrers
-    var referrers = document.getElementById('referrer-analytics-pie-referrers');
-    var referrerAnalyticsPie = new Chart(referrers, {
-      type: 'pie',
-      data: {
-        labels: <?php echo json_encode( $parsed['charts']['referrers']['labels'] ); ?>,
-        datasets: [{
-          data: [<?php echo implode( ',', $parsed['charts']['referrers']['data'] ); ?>],
-          backgroundColor: <?php echo json_encode( $parsed['charts']['referrers']['colors'] ); ?>,
-          borderWidth: 2,
-          borderColor: '#f1f1f1'
-        }],
-      },
-      options: {
-        legend: {
-          position: 'left',
-          fullWidth: false
-        }
-      }
-    });
 
-    // Types
-    var types = document.getElementById('referrer-analytics-pie-types');
-    var referrerAnalyticsPie = new Chart(types, {
-      type: 'pie',
-      data: {
-        labels: <?php echo json_encode( $parsed['charts']['type']['labels'] ); ?>,
-        datasets: [{
-          data: [<?php echo implode( ',', $parsed['charts']['type']['data'] ); ?>],
-          backgroundColor: <?php echo json_encode( $parsed['charts']['type']['colors'] ); ?>,
-          borderWidth: 2,
-          borderColor: '#f1f1f1'
-        }],
-      },
-      options: {
-        legend: {
-          position: 'left',
-          fullWidth: false
-        }
-      }
-    });
-    </script>
-    <h2><?php _e( 'Referrer Log', 'referrer-analytics' ); ?> <?php if ( $log_size ): ?><span style="font-size: 0.8rem; font-weight: normal; color: #666;">(<?php echo $log_size; ?>)</span><?php endif ?></h2>
-    <a href="<?php echo admin_url( 'options-general.php?page=referrer-analytics-log&delete=log' ); ?>" class="button button-primary"><?php _e( 'Delete Log', 'referrer-analytics' ); ?></a>
-    <table class="widefat fixed" style="margin-top: 0.5rem">
+    <table class="widefat fixed referrer-analytics-log-table">
       <tr>
         <thead>
           <th><?php _e( 'Date', 'referrer-analytics' ); ?></th>
@@ -136,7 +155,9 @@ function referrer_analytics_options_page() {
       $cnt = 0;
       foreach( $log as $key => $entry ):
         $cnt++;
-        if ( $cnt > $log_limit ) { continue; }
+
+        if ( $cnt < $starting_index ) { continue; }
+        if ( $cnt > $ending_index ) { break; }
         ?>
         <tr>
           <td><?php echo date( 'm/j/y g:i:s', strtotime( $entry['date' ] ) ); ?></td>
@@ -200,6 +221,16 @@ function referrer_analytics_options_page() {
         </tr>
       <?php endforeach; ?>
     </table>
+
+    <div class="referrer-analytics-pagination">
+      <?php echo paginate_links([
+        'base'      => add_query_arg( 'pagenum', '%#%' ),
+        'total'     => $total_pages,
+        'current'   => $current_page,
+        'next_text' => '»',
+        'prev_text' => '«'
+      ]); ?>
+    </div>
   <?php
  }
 
