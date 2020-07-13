@@ -5,7 +5,7 @@ Donate link: https://benmarshall.me
 Requires at least: 5.2
 Tested up to: 5.4.2
 Requires PHP: 7.1
-Stable tag: 1.2.0
+Stable tag: 1.1.0
 License: GNU GPLv3
 License URI: https://choosealicense.com/licenses/gpl-3.0/
 
@@ -58,7 +58,7 @@ For basic usage, have a look at the [plugin’s website](https://benmarshall.me/
 * `referrer_analytics_referrer_destination`<br />The user's original destination
 
 == Changelog ==
-= v1.2.0 =
+= v1.1.0 =
 * Added additional pre-defined referrer hosts
 * Added paging to the Referrer Log
-* Log now get's syned with updated referrer & known hosts
+* Log now get's synced with updated referrer & known hosts

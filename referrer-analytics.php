@@ -4,7 +4,7 @@
  *
  * @package    ReferrerAnalytics
  * @subpackage WordPress
- * @since      1.2.0
+ * @since      1.1.0
  * @author     Ben Marshall
  * @copyright  2020 Ben Marshall
  * @license    GPL-2.0-or-later
