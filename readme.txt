@@ -5,7 +5,7 @@ Donate link: https://benmarshall.me
 Requires at least: 5.2
 Tested up to: 5.4.2
 Requires PHP: 7.1
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GNU GPLv3
 License URI: https://choosealicense.com/licenses/gpl-3.0/
 
@@ -101,3 +101,9 @@ Due to some server hosts like [Pantheon](https://pantheon.io/docs/pantheon_strip
 
 * Added additional pre-defined referrer hosts
 * Various admin UI improvements
+
+= v1.3.1 =
+
+* Fixed PHP warning header output issue on the log page after a log is deleted for some hosts
+* Fixed duplicate comma seperated IP addresses on some hosts like Pantheon
+* Removed log files & now storing referred traffic in the database

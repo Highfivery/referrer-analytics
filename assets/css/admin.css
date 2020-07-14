@@ -2,25 +2,25 @@
   margin-bottom: 0.3rem;
 }
 
-.referrer-ananlytics-referrer-header,
+.referrer-analytics-referrer-header,
 .referrer-analytics-referrer-option {
   display: flex;
 }
 
-.referrer-ananlytics-referrer-header div,
+.referrer-analytics-referrer-header div,
 .referrer-analytics-input {
   width: calc(100% / 3);
 }
 
-.referrer-ananlytics-referrer-header div {
+.referrer-analytics-referrer-header div {
   margin-bottom: 0.3rem;
 }
 
-.referrer-ananlytics-referrer-header label {
+.referrer-analytics-referrer-header label {
   font-weight: bold;
 }
 
-.referrer-ananlytics-referrer-header small {
+.referrer-analytics-referrer-header small {
   color: #666;
   font-style: italic;
   display: block;
