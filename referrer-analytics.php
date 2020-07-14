@@ -4,7 +4,7 @@
  *
  * @package    ReferrerAnalytics
  * @subpackage WordPress
- * @since      1.2.0
+ * @since      1.3.0
  * @author     Ben Marshall
  * @copyright  2020 Ben Marshall
  * @license    GPL-2.0-or-later
@@ -13,7 +13,7 @@
  * Plugin Name:       Referrer Analytics
  * Plugin URI:        https://benmarshall.me/referrer-analytics
  * Description:       Track & store where your users came from for better reporting data in Google Analytics, conversion tracking & more. Make qualified decisions based on facts & figures, not conjecture.
- * Version:           1.2.0
+ * Version:           1.3.0
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Ben Marshall
@@ -400,23 +400,9 @@ if ( ! function_exists( 'referrer_analytics_parse_log' ) ) {
     if ( ! $log ) { return false; }
 
     $parsed = [
-      'totals' => [
-        'referrers'    => [],
-        'types'        => [],
-        'destinations' => []
-      ],
-      'charts' => [
-        'referrers' => [
-          'labels' => [],
-          'data'   => [],
-          'colors' => []
-        ],
-        'type' => [
-          'labels' => [],
-          'data'   => [],
-          'colors' => []
-        ]
-      ]
+      'referrers'    => [],
+      'types'        => [],
+      'destinations' => []
     ];
 
     foreach( $log as $key => $entry ) {
@@ -434,61 +420,30 @@ if ( ! function_exists( 'referrer_analytics_parse_log' ) ) {
         $entry['type'] = 'N/A';
       }
 
-      // Referrer totals
-      if ( empty( $parsed['totals']['referrers'][ $entry[ $referrer_key ] ] ) ) {
-        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['count'] = 1;
-        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['url']   = ! empty( $entry['url'] ) ? $entry['url'] : false;
-        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['flag']  = ! empty( $entry['flag'] ) ? $entry['flag'] : false;
-        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['name']  = $entry[ $referrer_key ];
-        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['type']  = $entry['type'];
+      // Referrer
+      if ( empty( $parsed['referrers'][ $entry[ $referrer_key ] ] ) ) {
+        $parsed['referrers'][ $entry[ $referrer_key ] ]['count'] = 1;
+        $parsed['referrers'][ $entry[ $referrer_key ] ]['url']   = ! empty( $entry['url'] ) ? $entry['url'] : false;
+        $parsed['referrers'][ $entry[ $referrer_key ] ]['flag']  = ! empty( $entry['flag'] ) ? $entry['flag'] : false;
+        $parsed['referrers'][ $entry[ $referrer_key ] ]['name']  = $entry[ $referrer_key ];
+        $parsed['referrers'][ $entry[ $referrer_key ] ]['type']  = $entry['type'];
       } else {
-        $parsed['totals']['referrers'][ $entry[ $referrer_key ] ]['count']++;
+        $parsed['referrers'][ $entry[ $referrer_key ] ]['count']++;
       }
 
-      // Type totals
-      if ( empty( $parsed['totals']['types'][ $entry['type'] ] ) ) {
-        $parsed['totals']['types'][ $entry['type'] ] = 1;
+      // Type
+      if ( empty( $parsed['types'][ $entry['type'] ] ) ) {
+        $parsed['types'][ $entry['type'] ] = 1;
       } else {
-        $parsed['totals']['types'][ $entry['type'] ]++;
+        $parsed['types'][ $entry['type'] ]++;
       }
 
-      // Destination totals
-      if ( empty( $parsed['totals']['destinations'][ $entry['destination'] ] ) ) {
-        $parsed['totals']['destinations'][ $entry['destination'] ] = 1;
+      // Destination
+      if ( empty( $parsed['destinations'][ $entry['destination'] ] ) ) {
+        $parsed['destinations'][ $entry['destination'] ] = 1;
       } else {
-        $parsed['totals']['destinations'][ $entry['destination'] ]++;
+        $parsed['destinations'][ $entry['destination'] ]++;
       }
-
-      // Set labels
-      if ( ! in_array( $entry[ $referrer_key ], $parsed['charts']['referrers']['labels'] ) ) {
-        $parsed['charts']['referrers']['labels'][] = $entry[ $referrer_key ];
-      }
-
-      if ( ! in_array( $entry['type'], $parsed['charts']['type']['labels'] ) ) {
-        $parsed['charts']['type']['labels'][] = $entry['type'];
-      }
-
-      // Set data
-      if ( ! empty( $parsed['charts']['referrers']['data'][ $entry[ $referrer_key ] ] ) ) {
-        $parsed['charts']['referrers']['data'][ $entry[ $referrer_key ] ]++;
-      } else {
-        $parsed['charts']['referrers']['data'][ $entry[ $referrer_key ] ] = 1;
-      }
-
-      if ( ! empty( $parsed['charts']['type']['data'][ $entry['type'] ] ) ) {
-        $parsed['charts']['type']['data'][ $entry['type'] ]++;
-      } else {
-        $parsed['charts']['type']['data'][ $entry['type'] ] = 1;
-      }
-    }
-
-    // Set colors for graphs
-    for ( $i = 1; $i <= count( $parsed['charts']['referrers']['labels'] ); $i++ ) {
-      $parsed['charts']['referrers']['colors'][] = sprintf("#%06x",rand(0,16777215));
-    }
-
-    for ( $i = 1; $i <= count( $parsed['charts']['type']['labels'] ); $i++ ) {
-      $parsed['charts']['type']['colors'][] = sprintf("#%06x",rand(0,16777215));
     }
 
     return $parsed;
@@ -561,21 +516,28 @@ if ( ! function_exists( 'referrer_analytics_get_known' ) ) {
       [ 'host' => 'www.google.ru', 'type' => 'organic', 'name' => 'Google (Russia)', 'url' => 'https://www.google.ru/' ],
       [ 'host' => 'www.google.fr', 'type' => 'organic', 'name' => 'Google (France)', 'url' => 'https://www.google.fr/' ],
       [ 'host' => 'www.google.in', 'type' => 'organic', 'name' => 'Google (India)', 'url' => 'https://www.google.in/' ],
+      [ 'host' => 'www.google.co.in', 'type' => 'organic', 'name' => 'Google (India)', 'url' => 'https://www.google.in/' ],
       [ 'host' => 'www.google.co.uk', 'type' => 'organic', 'name' => 'Google (United Kingdom)', 'url' => 'https://www.google.co.uk/' ],
       [ 'host' => 'www.google.ch', 'type' => 'organic', 'name' => 'Google (Switzerland)', 'url' => 'https://www.google.ch/' ],
       [ 'host' => 'www.google.co.kr', 'type' => 'organic', 'name' => 'Google (South Korea)', 'url' => 'https://www.google.co.kr/' ],
       [ 'host' => 'www.google.co.th', 'type' => 'organic', 'name' => 'Google (Thailand)', 'url' => 'https://www.google.co.th/' ],
       [ 'host' => 'www.google.com.eg', 'type' => 'organic', 'name' => 'Google (Egypt)', 'url' => 'https://www.google.com.eg/' ],
+      [ 'host' => 'www.google.com.ar', 'type' => 'organic', 'name' => 'Google (Argentina)', 'url' => 'https://www.google.com.ar/' ],
+      [ 'host' => 'www.google.com.br', 'type' => 'organic', 'name' => 'Google (Brazil)', 'url' => 'https://www.google.com.br/' ],
       [ 'host' => 'www.google.ro', 'type' => 'organic', 'name' => 'Google (Romania)', 'url' => 'https://www.google.ro/' ],
+      [ 'host' => 'www.google.com.au', 'type' => 'organic', 'name' => 'Google (Australia)', 'url' => 'https://www.google.com.au/' ],
+      [ 'host' => 'www.google.dk', 'type' => 'organic', 'name' => 'Google (Denmark)', 'url' => 'https://www.google.dk/' ],
+      [ 'host' => 'www.google.de', 'type' => 'organic', 'name' => 'Google (Germany)', 'url' => 'https://www.google.de/' ],
 
       // Bing
       [ 'host' => 'www.bing.com', 'type' => 'organic', 'name' => 'Bing', 'url' => 'https://www.bing.com/' ],
-      [ 'host' => 'cn.bing.com', 'type' => 'organic', 'name' => 'China', 'url' => 'https://www.bing.com/?mkt=zh-CN' ],
+      [ 'host' => 'cn.bing.com', 'type' => 'organic', 'name' => 'Bing (China)', 'url' => 'https://www.bing.com/?mkt=zh-CN' ],
 
       // Yahoo
       [ 'host' => 'r.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo', 'url' => 'https://www.yahoo.com/' ],
       [ 'host' => 'search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo', 'url' => 'https://www.yahoo.com/' ],
       [ 'host' => 'fr.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (France)', 'url' => 'https://fr.search.yahoo.com/' ],
+      [ 'host' => 'uk.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (United Kingdom)', 'url' => 'https://uk.search.yahoo.com/' ],
 
       // Other search engines
       [ 'host' => 'duckduckgo.com', 'type' => 'organic', 'name' => 'DuckDuckGo', 'url' => 'https://duckduckgo.com/' ],
@@ -592,6 +554,13 @@ if ( ! function_exists( 'referrer_analytics_get_known' ) ) {
       [ 'host' => 'amzn.to', 'type' => 'backlink', 'name' => 'Amazon', 'url' => 'https://www.amazon.com/' ],
       [ 'host' => 'jobsnearme.online', 'type' => 'backlink', 'name' => 'Jobs Near Me', 'url' => 'https://jobsnearme.online/' ],
       [ 'host' => 'www.entermedia.com', 'type' => 'backlink', 'name' => 'Entermedia, LLC.', 'url' => 'https://www.entermedia.com/' ],
+      [ 'host' => 'forum.bubble.io', 'type' => 'backlink', 'name' => 'Bubble Forum', 'url' => 'https://forum.bubble.io/' ],
+      [ 'host' => 'www.benmarshall.me', 'type' => 'backlink', 'name' => 'Ben Marshall', 'url' => 'https://benmarshall.me' ],
+      [ 'host' => 'github.com', 'type' => 'backlink', 'name' => 'GitHub', 'url' => 'https://github.com/' ],
+      [ 'host' => 'wordpress.org', 'type' => 'backlink', 'name' => 'WordPress', 'url' => 'https://wordpress.org/' ],
+      [ 'host' => 'school.nextacademy.com', 'type' => 'backlink', 'name' => 'NEXT Academy', 'url' => 'https://school.nextacademy.com/' ],
+      [ 'host' => 'www.soliddigital.com', 'type' => 'backlink', 'name' => 'Solid Digital', 'url' => 'https://www.soliddigital.com/' ],
+      [ 'host' => 'www.benellile.com', 'type' => 'backlink', 'name' => 'Benlli', 'url' => 'https://www.benellile.com/' ],
     ];
   }
 }

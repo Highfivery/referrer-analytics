@@ -57,15 +57,16 @@ function referrer_analytics_options_page() {
 
   // Paging variables
   $log_limit      = 20;
+  $chart_limit    = 15;
   $log_size       = referrer_analytics_log_size();
   $total_pages    = ceil( count( $log  ) / $log_limit );
   $current_page   = isset( $_GET['pagenum'] ) ? absint( $_GET['pagenum'] ) : 1;
   $starting_index = ( $current_page * $log_limit ) - $log_limit + 1;
   $ending_index   = ( $current_page * $log_limit );
 
-  $referrer_totals    = $parsed['totals']['referrers'];
-  $type_totals        = $parsed['totals']['types'];
-  $destination_totals = $parsed['totals']['destinations'];
+  $referrer_totals    = $parsed['referrers'];
+  $type_totals        = $parsed['types'];
+  $destination_totals = $parsed['destinations'];
 
   // Sort the results
   if ( $referrer_totals ) {
@@ -81,6 +82,10 @@ function referrer_analytics_options_page() {
   if ( $destination_totals ) {
     arsort( $destination_totals );
   }
+
+  $predefined_colors = [
+    '#1d3557', '#457b9d', '#a8dadc', '#f1faee', '#e63946', '#e76f51', '#f4a261', '#e9c46a', '#2a9d8f', '#264653', '#e29578', '#ffddd2', '#8d99ae', '#6d597a', '#dddf00', '#f15bb5'
+  ];
   ?>
   <div class="wrap">
     <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
@@ -156,20 +161,33 @@ function referrer_analytics_options_page() {
           </div>
         </div>
         <div class="referrer-analytics-box referrer-analytics-box-referrers-pie">
-          <h3><?php _e( 'Referrers', 'referrer-analytics' ); ?></h3>
+          <h3><?php _e( 'Top ' . $chart_limit . ' Referrers', 'referrer-analytics' ); ?></h3>
           <div class="inside">
-            <?php if ( $parsed['charts']['referrers']['data'] ): ?>
+            <?php if ( $referrer_totals ): ?>
               <canvas id="referrer-analytics-pie-referrers"></canvas>
               <script>
+              <?php
+              $labels = [];
+              $data   = [];
+              $count  = 0;
+              foreach( $referrer_totals as $key => $value ):
+                $count++;
+                if ( $count > $chart_limit ): break; endif;
+
+                $labels[] = $value['name'];
+                $data[]   = $value['count'];
+                $colors[] = $predefined_colors[ $count ];
+              endforeach;
+              ?>
               var referrers = document.getElementById('referrer-analytics-pie-referrers');
               var referrerAnalyticsPie = new Chart(referrers, {
                 type: 'pie',
                 data: {
-                  labels: <?php echo json_encode( $parsed['charts']['referrers']['labels'] ); ?>,
+                  labels: <?php echo json_encode( $labels ); ?>,
                   datasets: [{
-                    data: [<?php echo implode( ',', $parsed['charts']['referrers']['data'] ); ?>],
-                    backgroundColor: <?php echo json_encode( $parsed['charts']['referrers']['colors'] ); ?>,
-                    borderWidth: 2,
+                    data: <?php echo json_encode( $data ); ?>,
+                    backgroundColor: <?php echo json_encode( $colors ); ?>,
+                    borderWidth: 0,
                     borderColor: '#f1f1f1'
                   }],
                 },
@@ -187,20 +205,33 @@ function referrer_analytics_options_page() {
           </div>
         </div>
         <div class="referrer-analytics-box referrer-analytics-box-type-pie">
-          <h3><?php _e( 'Referrer Types', 'referrer-analytics' ); ?></h3>
+          <h3><?php _e( 'Top ' . $chart_limit . ' Referrer Types', 'referrer-analytics' ); ?></h3>
           <div class="inside">
-            <?php if ( $parsed['charts']['type']['data'] ): ?>
+            <?php if ( $type_totals ): ?>
               <canvas id="referrer-analytics-pie-types"></canvas>
               <script>
+              <?php
+              $labels = [];
+              $data   = [];
+              $count  = 0;
+              foreach( $type_totals as $key => $value ):
+                $count++;
+                if ( $count > $chart_limit ): break; endif;
+
+                $labels[] = $key;
+                $data[]   = $value;
+                $colors[] = $predefined_colors[ $count ];
+              endforeach;
+              ?>
               var types = document.getElementById('referrer-analytics-pie-types');
               var referrerAnalyticsPie = new Chart(types, {
                 type: 'pie',
                 data: {
-                  labels: <?php echo json_encode( $parsed['charts']['type']['labels'] ); ?>,
+                  labels: <?php echo json_encode( $labels ); ?>,
                   datasets: [{
-                    data: [<?php echo implode( ',', $parsed['charts']['type']['data'] ); ?>],
-                    backgroundColor: <?php echo json_encode( $parsed['charts']['type']['colors'] ); ?>,
-                    borderWidth: 2,
+                    data: <?php echo json_encode( $data ); ?>,
+                    backgroundColor: <?php echo json_encode( $colors ); ?>,
+                    borderWidth: 0,
                     borderColor: '#f1f1f1'
                   }],
                 },
