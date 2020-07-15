@@ -5,7 +5,7 @@ Donate link: https://benmarshall.me
 Requires at least: 5.2
 Tested up to: 5.4.2
 Requires PHP: 7.1
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 License: GNU GPLv3
 License URI: https://choosealicense.com/licenses/gpl-3.0/
 
@@ -56,6 +56,22 @@ For more information, see the [plugin’s website](https://benmarshall.me/referr
 
 == Frequently Asked Questions ==
 
+= Referrers not showing in the log? =
+
+Referrer Analytics relies on `$_SERVER['HTTP_REFERER]` to get site referrers. Due to increasing privacy settings, there's a handful of edge cases where this variable is not set:
+
+* The user was a "direct" visitor and typed the URL into the browser bar or used a bookmark.
+* The user followed a link from outside the browser (for example from an email or mobile app).
+* The user came to your non-secure `http` site from a secure `https` site and the browser hid the referrer for security reasons.
+* The user modified their browser not to send a referrer (such as using a browser extension to hide the information).
+* The user is using a proxy server that removes referrer headers.
+* The user clicked a link that has an HTML5 [`rel=noreferrer` attribute](https://html.spec.whatwg.org/multipage/links.html#link-type-noreferrer).
+* A site uses JavaScript to link to your site. Many browsers don't send a referrer when JavaScript uses `window.open` or `location.href` to open or set a URL.
+* A page redirects to yours with a [`meta refresh`](https://stackoverflow.com/questions/2985579/does-http-equiv-refresh-keep-referrer-info-and-metadata/24283850#24283850). Browsers either reset or remove the original referrer with this type of redirect.
+* The request was made by a robot that is not programmed to send referrer information. (Even legitimate robots such as Googlebot often do not send a referrer).
+
+You can choose to have a URL parameter fallback if one exists such as `utm_source` if the `$_SERVER['HTTP_REFERER]` is unavailable. Note that some CMS like WordPress, automatcially add `rel=noreferrer` to external links. You can control this from the plugin settings page.
+
 = What are the names of the referrer-specific cookies? =
 
 * `referrer-analytics-referrer_name`<br /><em>Human-readable name of the user's referrer</em>
@@ -81,11 +97,23 @@ Due to some server hosts like [Pantheon](https://pantheon.io/docs/pantheon_strip
 
 == Changelog ==
 
-= v1.1.0 =
+= v1.4.0 =
 
 * Added additional pre-defined referrer hosts
-* Added paging to the Referrer Log
-* Log now get's synced with updated referrer & known hosts
+* Added ability to have a fallback referrer if `$_SERVER['HTTP_REFERER']` is unavailable
+* Added the ability to prevent WP from automatcially adding `rel="noreferrer"` tags to external links
+* Fixed issue with some plugin form fields not saving
+
+= v1.3.1 =
+
+* Fixed PHP warning header output issue on the log page after a log is deleted for some hosts
+* Fixed duplicate comma seperated IP addresses on some hosts like Pantheon
+* Removed log files & now storing referred traffic in the database
+
+= v1.3.0 =
+
+* Added additional pre-defined referrer hosts
+* Various admin UI improvements
 
 = v1.2.0 =
 
@@ -97,13 +125,8 @@ Due to some server hosts like [Pantheon](https://pantheon.io/docs/pantheon_strip
 * Added URL field to Defined Referrer Hosts
 * Added UTM cookies
 
-= v1.3.0 =
+= v1.1.0 =
 
 * Added additional pre-defined referrer hosts
-* Various admin UI improvements
-
-= v1.3.1 =
-
-* Fixed PHP warning header output issue on the log page after a log is deleted for some hosts
-* Fixed duplicate comma seperated IP addresses on some hosts like Pantheon
-* Removed log files & now storing referred traffic in the database
+* Added paging to the Referrer Log
+* Log now get's synced with updated referrer & known hosts

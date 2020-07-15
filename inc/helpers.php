@@ -192,9 +192,6 @@ if ( ! function_exists( 'referrer_analytics_get_referrer' ) ) {
     $options      = referrer_analytics_options();
     $referrer_url = ! empty( $_SERVER['HTTP_REFERER'] ) ? $_SERVER['HTTP_REFERER'] : false;
 
-    // No referrer found
-    if ( ! $referrer_url ) { return false; }
-
     $referrer = [
       'url'         => false,
       'primary_url' => false,
@@ -206,13 +203,31 @@ if ( ! function_exists( 'referrer_analytics_get_referrer' ) ) {
       'is_flagged'  => false
     ];
 
-    // Get the basic referrer info
-    $url = parse_url( $referrer_url );
+    if ( $referrer_url ) {
+      // Referrer found, parse
+      $url = parse_url( $referrer_url );
 
-    $referrer['url']    = $referrer_url;
-    $referrer['scheme'] = ! empty( $url['scheme'] ) ? $url['scheme'] : false;
-    $referrer['host']   = ! empty( $url['host'] ) ? $url['host'] : false;
-    $referrer['path']   = ! empty( $url['path'] ) ? $url['path'] : false;
+      $referrer['url']    = $referrer_url;
+      $referrer['scheme'] = ! empty( $url['scheme'] ) ? $url['scheme'] : false;
+      $referrer['host']   = ! empty( $url['host'] ) ? $url['host'] : false;
+      $referrer['path']   = ! empty( $url['path'] ) ? $url['path'] : false;
+    } elseif( 'enabled' == $options['url_referrer_fallback'] ) {
+      // Unable to get referrer, fallback to URL referrer
+      $current_url = referrer_analytics_current_url();
+
+      if ( ! empty( $current_url['query'] ) && ! empty( $current_url['query'][ $options['referrer_fallback_param'] ] ) ) {
+        // URL referrer parameter found
+        $url_referrer_source = $current_url['query']['utm_source'];
+
+        $referrer['host'] = $url_referrer_source;
+      } else {
+        // No referrer found
+        return false;
+      }
+    } else {
+      // No referrer found
+      return false;
+    }
 
     // Get the host information
     $hosts = referrer_analytics_get_referrers();
@@ -294,6 +309,33 @@ if ( ! function_exists( 'referrer_analytics_get_log' ) ) {
 }
 
 /**
+ * Returns the plugin settings
+ */
+if ( ! function_exists( 'referrer_analytics_options' ) ) {
+  function referrer_analytics_options() {
+    $options = get_option( 'referrer_analytics_options' );
+
+    // Required fields
+    if ( empty( $options['utm_source'] ) ) { $options['utm_source'] = 'host'; }
+    if ( empty( $options['utm_medium'] ) ) { $options['utm_medium'] = 'type'; }
+    if ( empty( $options['utm_campaign'] ) ) { $options['utm_campaign'] = 'name'; }
+    if ( empty( $options['cookie_expiration'] ) ) { $options['cookie_expiration'] = 30; }
+    if ( empty( $options['referrer_fallback_param'] ) ) { $options['referrer_fallback_param'] = 'utm_source'; }
+    if ( empty( $options['hosts'] ) ) { $options['hosts'] = []; }
+
+    // Optional fields
+    if ( empty( $options['store_cookies'] ) ) { $options['store_cookies'] = 'disabled'; }
+    if ( empty( $options['logging'] ) ) { $options['logging'] = 'disabled'; }
+    if ( empty( $options['redirect_with_utm'] ) ) { $options['redirect_with_utm'] = 'enabled'; }
+    if ( empty( $options['track_all_referrers'] ) ) { $options['track_all_referrers'] = 'enabled'; }
+    if ( empty( $options['url_referrer_fallback'] ) ) { $options['url_referrer_fallback'] = 'enabled'; }
+    if ( empty( $options['disable_noreferrer'] ) ) { $options['disable_noreferrer'] = 'disabled'; }
+
+    return $options;
+  }
+}
+
+/**
  * Returns a list of plugin defined referrers
  */
 if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
@@ -301,6 +343,7 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
     return [
       // Google
       [ 'host' => 'www.google.com', 'type' => 'organic', 'name' => 'Google', 'primary_url' => 'https://www.google.com/' ],
+      [ 'host' => 'www.google.cl', 'type' => 'organic', 'name' => 'Google (Chile)', 'primary_url' => 'https://www.google.cl/' ],
       [ 'host' => 'www.google.ru', 'type' => 'organic', 'name' => 'Google (Russia)', 'primary_url' => 'https://www.google.ru/' ],
       [ 'host' => 'www.google.fr', 'type' => 'organic', 'name' => 'Google (France)', 'primary_url' => 'https://www.google.fr/' ],
       [ 'host' => 'www.google.in', 'type' => 'organic', 'name' => 'Google (India)', 'primary_url' => 'https://www.google.in/' ],
@@ -316,6 +359,7 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'www.google.com.au', 'type' => 'organic', 'name' => 'Google (Australia)', 'primary_url' => 'https://www.google.com.au/' ],
       [ 'host' => 'www.google.dk', 'type' => 'organic', 'name' => 'Google (Denmark)', 'primary_url' => 'https://www.google.dk/' ],
       [ 'host' => 'www.google.de', 'type' => 'organic', 'name' => 'Google (Germany)', 'primary_url' => 'https://www.google.de/' ],
+      [ 'host' => 'www.google.pl', 'type' => 'organic', 'name' => 'Google (Poland)', 'primary_url' => 'https://www.google.pl/' ],
 
       // Bing
       [ 'host' => 'www.bing.com', 'type' => 'organic', 'name' => 'Bing', 'primary_url' => 'https://www.bing.com/' ],
@@ -333,6 +377,9 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'www.ecosia.org', 'type' => 'organic', 'name' => 'Ecosia', 'primary_url' => 'https://www.ecosia.org/' ],
       [ 'host' => 'www.qwant.com', 'type' => 'organic', 'name' => 'Qwant', 'primary_url' => 'https://www.qwant.com/' ],
 
+      // Social media
+      [ 'host' => 't.co', 'type' => 'social', 'name' => 'Twitter', 'primary_url' => 'https://twitter.com/' ],
+
       // Others
       [ 'host' => 'site.ru', 'type' => 'bot', 'name' => 'site.ru', 'flag' => true ],
       [ 'host' => 'css-tricks.com', 'type' => 'backlink', 'name' => 'CSS-Tricks', 'primary_url' => 'https://css-tricks.com/' ],
@@ -342,6 +389,7 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'amzn.to', 'type' => 'backlink', 'name' => 'Amazon', 'primary_url' => 'https://www.amazon.com/' ],
       [ 'host' => 'jobsnearme.online', 'type' => 'backlink', 'name' => 'Jobs Near Me', 'primary_url' => 'https://jobsnearme.online/' ],
       [ 'host' => 'www.entermedia.com', 'type' => 'backlink', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
+      [ 'host' => 'entermedianow.com', 'type' => 'redirect', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
       [ 'host' => 'forum.bubble.io', 'type' => 'backlink', 'name' => 'Bubble Forum', 'primary_url' => 'https://forum.bubble.io/' ],
       [ 'host' => 'www.benmarshall.me', 'type' => 'backlink', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
       [ 'host' => 'benmarshall.me', 'type' => 'backlink', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
@@ -350,6 +398,8 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'school.nextacademy.com', 'type' => 'backlink', 'name' => 'NEXT Academy', 'primary_url' => 'https://school.nextacademy.com/' ],
       [ 'host' => 'www.soliddigital.com', 'type' => 'backlink', 'name' => 'Solid Digital', 'primary_url' => 'https://www.soliddigital.com/' ],
       [ 'host' => 'www.benellile.com', 'type' => 'backlink', 'name' => 'Benlli', 'primary_url' => 'https://www.benellile.com/' ],
+      [ 'host' => 'newsblur.com', 'type' => 'backlink', 'name' => 'NewsBlur', 'primary_url' => 'https://newsblur.com/' ],
+      [ 'host' => 'knowledge.exlibrisgroup.com', 'type' => 'backlink', 'name' => 'Ex Libris Knowledge Center', 'primary_url' => 'https://knowledge.exlibrisgroup.com/' ],
     ];
   }
 }

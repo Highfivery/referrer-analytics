@@ -343,6 +343,17 @@ function referrer_analytics_options_page() {
   <?php
  }
 
+ function referrer_analytics_validate_options( $input ) {
+  if ( empty( $input['logging'] ) ) { $input['logging'] = 'disabled'; }
+  if ( empty( $input['redirect_with_utm'] ) ) { $input['redirect_with_utm'] = 'disabled'; }
+  if ( empty( $input['track_all_referrers'] ) ) { $input['track_all_referrers'] = 'disabled'; }
+  if ( empty( $input['url_referrer_fallback'] ) ) { $input['url_referrer_fallback'] = 'disabled'; }
+  if ( empty( $input['store_cookies'] ) ) { $input['store_cookies'] = 'disabled'; }
+  if ( empty( $input['disable_noreferrer'] ) ) { $input['disable_noreferrer'] = 'disabled'; }
+
+  return $input;
+ }
+
  function referrer_analytics_admin_init() {
   if ( ! empty( $_REQUEST['delete'] ) && 'log' === $_REQUEST['delete'] ) {
     referrer_analytics_delete_log();
@@ -350,7 +361,9 @@ function referrer_analytics_options_page() {
     exit();
   }
 
-  register_setting( 'referrer_analytics', 'referrer_analytics_options' );
+  $options = referrer_analytics_options();
+
+  register_setting( 'referrer_analytics', 'referrer_analytics_options', 'referrer_analytics_validate_options' );
 
   add_settings_section( 'referrer_analytics_general_settings', __( 'General Settings', 'referrer_analytics' ), 'referrer_analytics_general_settings_cb', 'referrer_analytics' );
   add_settings_section( 'referrer_analytics_referrer_host_settings', __( 'Referrer Host Settings', 'referrer_analytics' ), 'referrer_analytics_referrer_host_settings_cb', 'referrer_analytics' );
@@ -361,7 +374,6 @@ function referrer_analytics_options_page() {
     'label_for' => 'redirect_with_utm',
     'type'      => 'checkbox',
     'multi'     => false,
-    'class'     => 'regular-text',
     'desc'      => 'When users come from another site, redirect & append the page their visting with the referring <a href="https://support.google.com/analytics/answer/1033863?hl=en" target="_blank" rel="noopener noreferrer">UTM data</a>.',
     'options'   => [
       'enabled' => __( 'Enabled', 'referrer_analytics' )
@@ -376,19 +388,39 @@ function referrer_analytics_options_page() {
     'label_for' => 'track_all_referrers',
     'type'      => 'checkbox',
     'multi'     => false,
-    'class'     => 'regular-text',
     'desc'      => 'If a user comes from a host that\'s not defined above, track it using the raw data.<br />Referrer Analytics will attempt to set \'Host\', \'Name\' & \'Type\' from it\'s list of known hosts.<br />If unable to locate, \'Host\' and \'Name\' will be the hostname of the referrer and \'Type\' will default to "backlink".',
     'options'   => [
       'enabled' => __( 'Enabled', 'referrer_analytics' )
     ]
   ]);
 
+  // Attempt to get referrer from URL
+  add_settings_field( 'url_referrer_fallback', __( 'Use URL Referrer Fallback', 'referrer_analytics' ), 'referrer_analytics_field_cb', 'referrer_analytics', 'referrer_analytics_referrer_host_settings', [
+    'label_for' => 'url_referrer_fallback',
+    'type'      => 'checkbox',
+    'multi'     => false,
+    'desc'      => 'If <code>$_SERVER[\'HTTP_REFERER\']</code> is unavailable (see the <a href="https://wordpress.org/plugins/referrer-analytics/" target="_blank" rel="noopener noreferrer">plugin FAQ</a> for more information), attempt to get the referrer from URL parameters.',
+    'options'   => [
+      'enabled' => __( 'Enabled', 'referrer_analytics' )
+    ]
+  ]);
+
+  if ( 'enabled' == $options['url_referrer_fallback'] ) {
+    // URL parameter for referrer fallack
+    add_settings_field( 'referrer_fallback_param', __( 'Referrer Fallback Parameter', 'referrer_analytics' ), 'referrer_analytics_field_cb', 'referrer_analytics', 'referrer_analytics_referrer_host_settings', [
+      'label_for'   => 'referrer_fallback_param',
+      'type'        => 'text',
+      'class'       => 'regular-text',
+      'desc'        => 'The URL parameter that should be used as the referrer fallback if unable to retrieve with <code>$_SERVER[\'HTTP_REFERER\']</code>.',
+      'placeholder' => 'e.g. utm_source'
+    ]);
+  }
+
   // Store Cookies
   add_settings_field( 'store_cookies', __( 'Store Cookies', 'referrer_analytics' ), 'referrer_analytics_field_cb', 'referrer_analytics', 'referrer_analytics_general_settings', [
     'label_for' => 'store_cookies',
     'type'      => 'checkbox',
     'multi'     => false,
-    'class'     => 'regular-text',
     'desc'      => 'Stores referrer host data in cookies that can be used for 3rd-party applications.',
     'options'   => [
       'enabled' => __( 'Enabled', 'referrer_analytics' )
@@ -409,8 +441,18 @@ function referrer_analytics_options_page() {
     'label_for' => 'logging',
     'type'      => 'checkbox',
     'multi'     => false,
-    'class'     => 'regular-text',
     'desc'      => 'Enables logging of user referrers and provides an admin interface to view statistics.',
+    'options'   => [
+      'enabled' => __( 'Enabled', 'referrer_analytics' )
+    ]
+  ]);
+
+  // Disable rel=noreferrer
+  add_settings_field( 'disable_noreferrer', __( 'Disable <code>rel="noreferrer"</code>', 'referrer_analytics' ), 'referrer_analytics_field_cb', 'referrer_analytics', 'referrer_analytics_general_settings', [
+    'label_for' => 'disable_noreferrer',
+    'type'      => 'checkbox',
+    'multi'     => false,
+    'desc'      => 'Allows external link destinations to retrieve the <code>$_SERVER[\'HTTP_REFERER\']</code> by disabling WordPress from automatcially adding the <code>rel="noreferrer"</code> tag when enabled.',
     'options'   => [
       'enabled' => __( 'Enabled', 'referrer_analytics' )
     ]
@@ -580,7 +622,7 @@ function referrer_analytics_field_cb( $args ) {
     case 'number':
     case 'email':
       ?>
-      <input class="<?php echo $args['class']; ?>" type="<?php echo $args['type']; ?>" value="<?php if ( ! empty( $options[ $args['label_for'] ] ) ): echo esc_attr( $options[ $args['label_for'] ] ); endif; ?>" placeholder="" id="<?php echo esc_attr( $args['label_for'] ); ?>" name="referrer_analytics_options[<?php echo esc_attr( $args['label_for'] ); ?>]"><?php if ( ! empty( $args['suffix'] ) ): echo ' ' . $args['suffix']; endif; ?>
+      <input class="<?php echo $args['class']; ?>" type="<?php echo $args['type']; ?>" value="<?php if ( ! empty( $options[ $args['label_for'] ] ) ): echo esc_attr( $options[ $args['label_for'] ] ); endif; ?>" placeholder="<?php if( ! empty( $args['placeholder'] ) ): ?><?php echo $args['placeholder']; ?><?php endif; ?>" id="<?php echo esc_attr( $args['label_for'] ); ?>" name="referrer_analytics_options[<?php echo esc_attr( $args['label_for'] ); ?>]"><?php if ( ! empty( $args['suffix'] ) ): echo ' ' . $args['suffix']; endif; ?>
       <p class="description"><?php echo $args['desc'] ?></p>
       <?php
     break;
@@ -606,7 +648,7 @@ function referrer_analytics_field_cb( $args ) {
         <label for="<?php echo esc_attr( $args['label_for'] . $key ); ?>">
           <input
             type="checkbox"
-            class="<?php echo $args['class']; ?>"
+            <?php if ( ! empty( $args['class'] ) ): ?>class="<?php echo $args['class']; ?>"<?php endif; ?>
             id="<?php echo esc_attr( $args['label_for'] . $key ); ?>"
             name="referrer_analytics_options[<?php echo esc_attr( $args['label_for'] ); ?>]<?php if( $args['multi'] ): ?>[<?php echo $key; ?>]<?php endif; ?>" value="<?php echo $key; ?>"
             <?php if( $args['multi'] && $key === $options[ $args['label_for'] ][ $key ] || ! $args['multi'] && $key === $options[ $args['label_for'] ] ): ?> checked="checked"<?php endif; ?> /> <?php echo $label; ?>

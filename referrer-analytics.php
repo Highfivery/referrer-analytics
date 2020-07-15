@@ -4,7 +4,7 @@
  *
  * @package    ReferrerAnalytics
  * @subpackage WordPress
- * @since      1.3.1
+ * @since      1.4.0
  * @author     Ben Marshall
  * @copyright  2020 Ben Marshall
  * @license    GPL-2.0-or-later
@@ -13,7 +13,7 @@
  * Plugin Name:       Referrer Analytics
  * Plugin URI:        https://benmarshall.me/referrer-analytics
  * Description:       Track & store where your users came from for better reporting data in Google Analytics, conversion tracking & more. Make qualified decisions based on facts & figures, not conjecture.
- * Version:           1.3.1
+ * Version:           1.4.0
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Ben Marshall
@@ -204,30 +204,17 @@ add_action( 'template_redirect', function() {
     wp_redirect( $redirect_url );
     exit;
   }
-
 });
 
-/**
- * Get plugin options
- */
-if ( ! function_exists( 'referrer_analytics_options' ) ) {
-  function referrer_analytics_options() {
-    $options = get_option( 'referrer_analytics_options' );
+add_filter( 'wp_targeted_link_rel', function( $rel_values ) {
+  $options = referrer_analytics_options();
 
-    if ( empty( $options['utm_source'] ) ) { $options['utm_source'] = 'host'; }
-    if ( empty( $options['utm_medium'] ) ) { $options['utm_medium'] = 'type'; }
-    if ( empty( $options['utm_campaign'] ) ) { $options['utm_campaign'] = 'name'; }
-
-    if ( empty( $options['cookie_expiration'] ) ) { $options['cookie_expiration'] = 30; }
-    if ( empty( $options['track_all_referrers'] ) ) { $options['track_all_referrers'] = 'disabled'; }
-    if ( empty( $options['redirect_with_utm'] ) ) { $options['redirect_with_utm'] = 'disabled'; }
-    if ( empty( $options['store_cookies'] ) ) { $options['store_cookies'] = 'disabled'; }
-    if ( empty( $options['logging'] ) ) { $options['logging'] = 'disabled'; }
-    if ( empty( $options['hosts'] ) ) { $options['hosts'] = []; }
-
-    return $options;
+  if ( 'enabled' == $options['disable_noreferrer'] ) {
+    return str_replace( 'noreferrer', '', $rel_values );
   }
-}
+
+  return $rel_values;
+});
 
 /**
  * Returns the current URL
