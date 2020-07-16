@@ -25,7 +25,7 @@ function referrer_analytics_admin_menu() {
       __( 'Referrer Log &amp; Stats', 'wpzerospam' ),
       'manage_options',
       'referrer-analytics-log',
-      'referrer_analytics_log_page',
+      'referrer_analytics_log_page'
     );
   }
 }
