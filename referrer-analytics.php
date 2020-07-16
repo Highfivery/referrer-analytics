@@ -4,7 +4,7 @@
  *
  * @package    ReferrerAnalytics
  * @subpackage WordPress
- * @since      1.4.0
+ * @since      1.0.0
  * @author     Ben Marshall
  * @copyright  2020 Ben Marshall
  * @license    GPL-2.0-or-later
@@ -13,7 +13,7 @@
  * Plugin Name:       Referrer Analytics
  * Plugin URI:        https://benmarshall.me/referrer-analytics
  * Description:       Track & store where your users came from for better reporting data in Google Analytics, conversion tracking & more. Make qualified decisions based on facts & figures, not conjecture.
- * Version:           1.4.0
+ * Version:           1.4.1
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Ben Marshall

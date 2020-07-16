@@ -298,11 +298,21 @@ if ( ! function_exists( 'referrer_analytics_log' ) ) {
  * Returns the referrer entries from the database
  */
 if ( ! function_exists( 'referrer_analytics_get_log' ) ) {
-  function referrer_analytics_get_log() {
+  function referrer_analytics_get_log( $args = [] ) {
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'referrer_analytics';
-    $results    = $wpdb->get_results( "SELECT * FROM $table_name" );
+
+    $query = "SELECT * FROM $table_name";
+    if ( ! empty( $args['limit'] ) ) {
+      $query .= " LIMIT " .$args['limit'];
+    }
+
+    if ( ! empty( $args['offset'] ) ) {
+      $query .= ", " . $args['offset'];
+    }
+
+    $results = $wpdb->get_results( $query );
 
     return $results;
   }
@@ -379,27 +389,37 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
 
       // Social media
       [ 'host' => 't.co', 'type' => 'social', 'name' => 'Twitter', 'primary_url' => 'https://twitter.com/' ],
+      [ 'host' => 'www.facebook.com', 'type' => 'social', 'name' => 'Facebook', 'primary_url' => 'https://www.facebook.com/' ],
+      [ 'host' => 'www.linkedin.com', 'type' => 'social', 'name' => 'LinkedIn', 'primary_url' => 'https://www.linkedin.com/' ],
+      [ 'host' => 'www.instagram.com', 'type' => 'social', 'name' => 'Instagram', 'primary_url' => 'https://www.instagram.com/' ],
+      [ 'host' => 'www.youtube.com', 'type' => 'social', 'name' => 'YouTube', 'primary_url' => 'https://www.youtube.com/' ],
 
       // Others
       [ 'host' => 'site.ru', 'type' => 'bot', 'name' => 'site.ru', 'flag' => true ],
-      [ 'host' => 'css-tricks.com', 'type' => 'backlink', 'name' => 'CSS-Tricks', 'primary_url' => 'https://css-tricks.com/' ],
-      [ 'host' => 'lurkmore.to', 'type' => 'backlink', 'name' => 'Lurkmore', 'primary_url' => 'https://lurkmore.to/' ],
-      [ 'host' => 'drupalsun.com', 'type' => 'backlink', 'name' => 'Drupal Sun', 'primary_url' => 'https://drupalsun.com/' ],
-      [ 'host' => 'cdpn.io', 'type' => 'backlink', 'name' => 'CodePen', 'primary_url' => 'https://codepen.io/' ],
-      [ 'host' => 'amzn.to', 'type' => 'backlink', 'name' => 'Amazon', 'primary_url' => 'https://www.amazon.com/' ],
-      [ 'host' => 'jobsnearme.online', 'type' => 'backlink', 'name' => 'Jobs Near Me', 'primary_url' => 'https://jobsnearme.online/' ],
-      [ 'host' => 'www.entermedia.com', 'type' => 'backlink', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
+      [ 'host' => 'css-tricks.com', 'type' => 'referral', 'name' => 'CSS-Tricks', 'primary_url' => 'https://css-tricks.com/' ],
+      [ 'host' => 'lurkmore.to', 'type' => 'referral', 'name' => 'Lurkmore', 'primary_url' => 'https://lurkmore.to/' ],
+      [ 'host' => 'drupalsun.com', 'type' => 'referral', 'name' => 'Drupal Sun', 'primary_url' => 'https://drupalsun.com/' ],
+      [ 'host' => 'cdpn.io', 'type' => 'referral', 'name' => 'CodePen', 'primary_url' => 'https://codepen.io/' ],
+      [ 'host' => 'amzn.to', 'type' => 'referral', 'name' => 'Amazon', 'primary_url' => 'https://www.amazon.com/' ],
+      [ 'host' => 'jobsnearme.online', 'type' => 'referral', 'name' => 'Jobs Near Me', 'primary_url' => 'https://jobsnearme.online/' ],
+      [ 'host' => 'www.entermedia.com', 'type' => 'referral', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
       [ 'host' => 'entermedianow.com', 'type' => 'redirect', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
-      [ 'host' => 'forum.bubble.io', 'type' => 'backlink', 'name' => 'Bubble Forum', 'primary_url' => 'https://forum.bubble.io/' ],
-      [ 'host' => 'www.benmarshall.me', 'type' => 'backlink', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
-      [ 'host' => 'benmarshall.me', 'type' => 'backlink', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
-      [ 'host' => 'github.com', 'type' => 'backlink', 'name' => 'GitHub', 'primary_url' => 'https://github.com/' ],
-      [ 'host' => 'wordpress.org', 'type' => 'backlink', 'name' => 'WordPress', 'primary_url' => 'https://wordpress.org/' ],
-      [ 'host' => 'school.nextacademy.com', 'type' => 'backlink', 'name' => 'NEXT Academy', 'primary_url' => 'https://school.nextacademy.com/' ],
-      [ 'host' => 'www.soliddigital.com', 'type' => 'backlink', 'name' => 'Solid Digital', 'primary_url' => 'https://www.soliddigital.com/' ],
-      [ 'host' => 'www.benellile.com', 'type' => 'backlink', 'name' => 'Benlli', 'primary_url' => 'https://www.benellile.com/' ],
-      [ 'host' => 'newsblur.com', 'type' => 'backlink', 'name' => 'NewsBlur', 'primary_url' => 'https://newsblur.com/' ],
-      [ 'host' => 'knowledge.exlibrisgroup.com', 'type' => 'backlink', 'name' => 'Ex Libris Knowledge Center', 'primary_url' => 'https://knowledge.exlibrisgroup.com/' ],
+      [ 'host' => 'entermedia.com', 'type' => 'referral', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
+      [ 'host' => 'forum.bubble.io', 'type' => 'referral', 'name' => 'Bubble Forum', 'primary_url' => 'https://forum.bubble.io/' ],
+      [ 'host' => 'www.benmarshall.me', 'type' => 'referral', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
+      [ 'host' => 'benmarshall.me', 'type' => 'referral', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
+      [ 'host' => 'github.com', 'type' => 'referral', 'name' => 'GitHub', 'primary_url' => 'https://github.com/' ],
+      [ 'host' => 'wordpress.org', 'type' => 'referral', 'name' => 'WordPress', 'primary_url' => 'https://wordpress.org/' ],
+      [ 'host' => 'school.nextacademy.com', 'type' => 'referral', 'name' => 'NEXT Academy', 'primary_url' => 'https://school.nextacademy.com/' ],
+      [ 'host' => 'www.soliddigital.com', 'type' => 'referral', 'name' => 'Solid Digital', 'primary_url' => 'https://www.soliddigital.com/' ],
+      [ 'host' => 'www.benellile.com', 'type' => 'referral', 'name' => 'Benlli', 'primary_url' => 'https://www.benellile.com/' ],
+      [ 'host' => 'newsblur.com', 'type' => 'referral', 'name' => 'NewsBlur', 'primary_url' => 'https://newsblur.com/' ],
+      [ 'host' => 'knowledge.exlibrisgroup.com', 'type' => 'referral', 'name' => 'Ex Libris Knowledge Center', 'primary_url' => 'https://knowledge.exlibrisgroup.com/' ],
+      [ 'host' => 'anti-crisis-seo.com', 'type' => 'bot', 'name' => 'SEO Anti-Crisis Tool', 'primary_url' => 'http://anti-crisis-seo.com' ],
+      [ 'host' => 'minepub.net', 'type' => 'referral', 'name' => 'Minepub', 'primary_url' => 'https://minepub.net/' ],
+
+      // Edge cases
+      [ 'host' => 'PANTHEON_STRIPPED', 'type' => 'direct', 'name' => 'Direct Traffic' ],
     ];
   }
 }

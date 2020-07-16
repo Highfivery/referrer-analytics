@@ -9,10 +9,24 @@
 function referrer_analytics_admin_menu() {
   $options = referrer_analytics_options();
 
-  add_submenu_page( 'options-general.php', __( 'Referrer Analytics Settings', 'referrer_analytics' ), __( 'Referrer Analytics', 'referrer_analytics' ), 'manage_options', 'referrer-analytics', 'referrer_analytics_options_page' );
+  $main_page = add_menu_page(
+    __( 'Referrer Analytics Dashboard', 'wpzerospam' ),
+    __( 'Referrer Analytics', 'wpzerospam' ),
+    'manage_options',
+    'referrer-analytics',
+    'referrer_analytics_options_page',
+    'dashicons-chart-area'
+  );
 
   if ( 'enabled' === $options['logging'] ) {
-    add_submenu_page( 'options-general.php', __( 'Referrer Analytics Log', 'referrer_analytics' ), __( 'Referrer Log & Stats', 'referrer_analytics' ), 'manage_options', 'referrer-analytics-log', 'referrer_analytics_log_page' );
+    add_submenu_page(
+      'referrer-analytics',
+      __( 'Referrer Analytics Log', 'wpzerospam' ),
+      __( 'Referres Log &amp; Stats', 'wpzerospam' ),
+      'manage_options',
+      'referrer-analytics-log',
+      'referrer_analytics_log_page',
+    );
   }
 }
 add_action( 'admin_menu', 'referrer_analytics_admin_menu' );
@@ -49,13 +63,8 @@ function referrer_analytics_options_page() {
   $known_referrers = referrer_analytics_referrers();
 
   // Paging variables
-  $log_limit      = 20;
-  $chart_limit    = 15;
-  $total_pages    = ceil( count( $log  ) / $log_limit );
-  $current_page   = isset( $_GET['pagenum'] ) ? absint( $_GET['pagenum'] ) : 1;
-  $starting_index = ( $current_page * $log_limit ) - $log_limit + 1;
-  $ending_index   = ( $current_page * $log_limit );
-
+  $chart_limit        = 15;
+  $current_page       = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
   $referrer_totals    = $parsed_log['referrers'];
   $type_totals        = $parsed_log['types'];
   $destination_totals = $parsed_log['destinations'];
@@ -245,101 +254,34 @@ function referrer_analytics_options_page() {
 
     <h2><?php _e( 'Referrer Log', 'referrer-analytics' ); ?></h2>
 
-    <div class="referrer-analytics-log-table-header">
-      <div class="referrer-analytics-log-table-header-headline">
-        <?php _e( 'Showing', 'referrer-analytics' ); ?> <?php echo $starting_index; ?> - <?php echo $ending_index; ?> <?php _e( 'of', 'referrer-analytics' ); ?> <?php echo count( $log  ); ?>
-      </div>
-      <div class="referrer-analytics-log-table-header-actions">
-        <a href="<?php echo admin_url( 'options-general.php?page=referrer-analytics-log&delete=log' ); ?>" class="button button-primary"><?php _e( 'Delete Log', 'referrer-analytics' ); ?></a>
-      </div>
-    </div>
+    <a href="<?php echo admin_url( 'options-general.php?page=referrer-analytics-log&delete=log' ); ?>" style="float: right" class="button button-primary"><?php _e( 'Delete All Log Entries', 'referrer-analytics' ); ?></a>
 
-    <table class="widefat fixed referrer-analytics-log-table">
-      <tr>
-        <thead>
-          <th><?php _e( 'Date', 'referrer-analytics' ); ?></th>
-          <th>IP</th>
-          <th><?php _e( 'User', 'referrer-analytics' ); ?></th>
-          <th><?php _e( 'Referring URL', 'referrer-analytics' ); ?></th>
-          <th><?php _e( 'URL Destination', 'referrer-analytics' ); ?></th>
-          <th><?php _e( 'Referrer Host', 'referrer-analytics' ); ?></th>
-          <th><?php _e( 'Referrer Type', 'referrer-analytics' ); ?></th>
-          <th><?php _e( 'Referrer Name', 'referrer-analytics' ); ?></th>
-        </thead>
-      </tr>
-      <?php
-      $cnt = 0;
-      foreach( $log as $key => $entry ):
-        $cnt++;
+    <?php
+    /**
+     * Log table
+     */
+    require plugin_dir_path( REFERRER_ANALYTICS ) . '/classes/class-referrer-analytics-log-table.php';
 
-        if ( $cnt < $starting_index ) { continue; }
-        if ( $cnt > $ending_index ) { break; }
-        ?>
-        <tr>
-          <td><?php echo date( 'm/j/y g:i:s', strtotime( $entry->date_recorded ) ); ?></td>
-          <td>
-            <?php if ( ! empty( $entry->visitor_ip ) ): ?>
-              <a href="https://whatismyipaddress.com/ip/<?php echo $entry->visitor_ip; ?>" target="_blank" rel="noopener noreferrer"><?php echo $entry->visitor_ip; ?></a>
-            <?php else: ?>
-              N/A
-            <?php endif; ?>
-          </td>
-          <td>
-            <?php if ( ! empty( $entry->user_id ) ): ?>
-              <?php $user = get_user_by( 'ID',  $entry->user_id ); ?>
-              <a href="<?php echo get_edit_user_link( $user->ID ); ?>"><?php echo $user->display_name; ?> (<?php echo $user->ID; ?>)</a>
-            <?php else: ?>
-              N/A
-            <?php endif; ?>
-          </td>
-          <td>
-            <?php if ( ! empty( $entry->referrer_url ) ): ?>
-              <a href="<?php echo esc_url( $entry->referrer_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo $entry->referrer_url; ?></a>
-            <?php else: ?>
-              N/A
-            <?php endif; ?>
-          </td>
-          <td>
-            <?php if ( ! empty( $entry->url_destination ) ): ?>
-              <a href="<?php echo esc_url( $entry->url_destination ); ?>" target="_blank" rel="noopener noreferrer"><?php echo $entry->url_destination; ?></a>
-            <?php else: ?>
-              N/A
-            <?php endif; ?>
-          </td>
-          <td>
-            <?php if ( ! empty( $entry->referrer_host ) ): ?>
-              <?php echo $entry->referrer_host; ?>
-            <?php else: ?>
-              N/A
-            <?php endif; ?>
-          </td>
-          <td>
-            <?php if ( ! empty( $entry->referrer_type ) ): ?>
-              <?php echo $entry->referrer_type; ?>
-            <?php else: ?>
-              N/A
-            <?php endif; ?>
-          </td>
-          <td>
-            <?php if ( ! empty( $entry->referrer_name ) ): ?>
-              <?php echo $entry->referrer_name; ?>
-            <?php else: ?>
-              N/A
-            <?php endif; ?>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-    </table>
+    $table_data = new ReferrerAnalytics_Log_Table();
 
-    <div class="referrer-analytics-pagination">
-      <?php echo paginate_links([
-        'base'      => add_query_arg( 'pagenum', '%#%' ),
-        'total'     => $total_pages,
-        'current'   => $current_page,
-        'next_text' => '»',
-        'prev_text' => '«'
-      ]); ?>
-    </div>
+    // Setup page parameters
+    $current_page = $table_data->get_pagenum();
+    $current_page = (isset($current_page)) ? $current_page : 1;
+    $paged        = (isset($_GET['page'])) ? $_GET['page'] : $current_page;
+    $paged        = (isset($_GET['paged'])) ? $_GET['paged'] : $current_page;
+    $paged        = (isset($args['paged'])) ? $args['paged'] : $paged;
+
+    // Fetch, prepare, sort, and filter our data...
+    $table_data->prepare_items();
+    ?>
+    <form id="log-table" method="post">
+      <?php wp_nonce_field( 'referreranalytics_nonce', 'referreranalytics_nonce' ); ?>
+
+      <?php # Current page ?>
+      <input type="hidden" name="paged" value="<?php echo $paged; ?>" />
+
+      <?php $table_data->display(); ?>
+    </form>
   <?php
  }
 
@@ -388,7 +330,7 @@ function referrer_analytics_options_page() {
     'label_for' => 'track_all_referrers',
     'type'      => 'checkbox',
     'multi'     => false,
-    'desc'      => 'If a user comes from a host that\'s not defined above, track it using the raw data.<br />Referrer Analytics will attempt to set \'Host\', \'Name\' & \'Type\' from it\'s list of known hosts.<br />If unable to locate, \'Host\' and \'Name\' will be the hostname of the referrer and \'Type\' will default to "backlink".',
+    'desc'      => 'If a user comes from a host that\'s not defined above, track it using the raw data.<br />Referrer Analytics will attempt to set \'Host\', \'Name\' & \'Type\' from it\'s list of known hosts.<br />If unable to locate, \'Host\' and \'Name\' will be the hostname of the referrer and \'Type\' will default to "referral".',
     'options'   => [
       'enabled' => __( 'Enabled', 'referrer_analytics' )
     ]
@@ -519,7 +461,7 @@ function referrer_analytics_referrers_cb( $args ) {
     </div>
     <div>
       <label><?php _e( 'Type', 'referrer_analytics' ); ?></label>
-      <small><?php _e( 'Define a type for the referrer (i.e. organic, backlink, etc.).', 'referrer_analytics' ); ?></small>
+      <small><?php _e( 'Define a type for the referrer (i.e. organic, referral, etc.).', 'referrer_analytics' ); ?></small>
     </div>
     <div>
       <label><?php _e( 'Name', 'referrer_analytics' ); ?></label>
