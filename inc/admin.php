@@ -22,7 +22,7 @@ function referrer_analytics_admin_menu() {
     add_submenu_page(
       'referrer-analytics',
       __( 'Referrer Analytics Log', 'wpzerospam' ),
-      __( 'Referres Log &amp; Stats', 'wpzerospam' ),
+      __( 'Referrer Log &amp; Stats', 'wpzerospam' ),
       'manage_options',
       'referrer-analytics-log',
       'referrer_analytics_log_page',
