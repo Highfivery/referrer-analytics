@@ -10,24 +10,22 @@ function referrer_analytics_admin_menu() {
   $options = referrer_analytics_options();
 
   $main_page = add_menu_page(
-    __( 'Referrer Analytics Dashboard', 'wpzerospam' ),
+    __( 'Referrer Analytics Log', 'wpzerospam' ),
     __( 'Referrer Analytics', 'wpzerospam' ),
     'manage_options',
     'referrer-analytics',
-    'referrer_analytics_options_page',
+    'referrer_analytics_log_page',
     'dashicons-chart-area'
   );
 
-  if ( 'enabled' === $options['logging'] ) {
-    add_submenu_page(
-      'referrer-analytics',
-      __( 'Referrer Analytics Log', 'wpzerospam' ),
-      __( 'Referrer Log &amp; Stats', 'wpzerospam' ),
-      'manage_options',
-      'referrer-analytics-log',
-      'referrer_analytics_log_page'
-    );
-  }
+  add_submenu_page(
+    'referrer-analytics',
+    __( 'Referrer Analytics Settings', 'wpzerospam' ),
+    __( 'Settings', 'wpzerospam' ),
+    'manage_options',
+    'referrer-analytics-settings',
+    'referrer_analytics_options_page'
+  );
 }
 add_action( 'admin_menu', 'referrer_analytics_admin_menu' );
 
@@ -91,170 +89,35 @@ function referrer_analytics_options_page() {
   <div class="wrap">
     <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
+    <div class="referrer-analytics-callout">
+      <div class="referrer-analytics-callout-content">
+        <h2><?php _e( 'Are you a fan of the <a href="https://wordpress.org/plugins/referrer-analytics/?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" target="_blank">Referrer Analytics</a> plugin? Show your support.', 'referrer-analytics' ); ?></h2>
+        <p><?php _e( 'Help support the continued development of the Referrer Analytics plugin by <a href="https://benmarshall.me/donate?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" target="_blank">donating today</a>. Your donation goes towards the time it takes to develop new features &amp; updates, but also helps provide pro bono work for nonprofits. <a href="https://benmarshall.me/donate?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" target="_blank">Learn more</a>.', 'referrer-analytics' ); ?></p>
+      </div>
+      <div class="referrer-analytics-callout-actions">
+        <a href="https://github.com/bmarshall511/referrer-analytics/issues" class="button" target="_blank"><?php _e( 'Submit Bug/Feature Request' ); ?></a>
+        <a href="https://github.com/bmarshall511/referrer-analytics" class="button" target="_blank"><?php _e( 'Fork on Github' ); ?></a>
+        <a href="https://benmarshall.me/donate?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" class="button button-primary" target="_blank"><?php _e( 'Show your Support &mdash; Donate' ); ?></a>
+      </div>
+    </div>
+
     <?php if ( $current_page === 1 ): ?>
       <h2><?php _e( 'Statistics', 'referrer-analytics' ); ?></h2>
       <div class="referrer-analytics-boxes">
-        <div class="referrer-analytics-box referrer-analytics-box-top-referrers">
-          <h3><?php _e( 'Top 10 Referrers', 'referrer-analytics' ); ?></h3>
-          <div class="inside">
-            <?php if ( $referrer_totals ): ?>
-              <ol>
-                <?php
-                $cnt = 0;
-                foreach( $referrer_totals as $key => $entry ):
-                  $cnt++;
-                  if ( $cnt > 10 ) { break; }
-                  ?>
-                  <li>
-                    <?php if ( ! empty( $entry['primary_url'] ) ): ?><a href="<?php echo esc_url( $entry['primary_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php endif; ?>
-                      <strong><?php echo $entry['name']; ?></strong>
-                    <?php if ( ! empty( $entry['primary_url'] ) ): ?></a><?php endif; ?> &mdash; <?php echo $entry['count']; ?>
-                    <?php if ( ! empty( $entry['type'] ) ): ?>
-                      (<?php echo $entry['type']; ?>)
-                    <?php endif; ?>
-                    <?php if ( ! empty( $entry['flag'] ) && $entry['flag'] ): ?>
-                      <span style="color: #ca4a1f;"><?php _e( 'potentially malicious, consider blocking', 'referrer-analytics' ); ?></span>
-                    <?php endif; ?>
-                  </li>
-                <?php endforeach; ?>
-              </ol>
-            <?php else: ?>
-              <?php _e( 'No data to report yet.', 'referrer-analytics' ); ?>
-            <?php endif; ?>
-          </div>
-        </div>
-        <div class="referrer-analytics-box referrer-analytics-box-top-types">
-          <h3><?php _e( 'Top 10 Referrer Types', 'referrer-analytics' ); ?></h3>
-          <div class="inside">
-            <?php if ( $type_totals ): ?>
-              <ol>
-                <?php
-                $cnt = 0;
-                foreach( $type_totals as $type => $count ):
-                  $cnt++;
-                  if ( $cnt > 10 ) { break; }
-                  ?>
-                  <li><strong><?php echo $type; ?></strong> &mdash; <?php echo $count; ?></li>
-                <?php endforeach; ?>
-              </ol>
-            <?php else: ?>
-              <?php _e( 'No data to report yet.', 'referrer-analytics' ); ?>
-            <?php endif; ?>
-          </div>
-        </div>
-        <div class="referrer-analytics-box referrer-analytics-box-top-types">
-          <h3><?php _e( 'Top 10 Referred Destinations', 'referrer-analytics' ); ?></h3>
-          <div class="inside">
-            <?php if ( $destination_totals ): ?>
-              <ol>
-                <?php
-                $cnt = 0;
-                foreach( $destination_totals as $url => $count ):
-                  $cnt++;
-                  if ( $cnt > 10 ) { break; }
-                  ?>
-                  <li><strong><a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo str_replace( site_url(), '', $url ); ?></a></strong> &mdash; <?php echo $count; ?></li>
-                <?php endforeach; ?>
-              </ol>
-            <?php else: ?>
-              <?php _e( 'No data to report yet.', 'referrer-analytics' ); ?>
-            <?php endif; ?>
-          </div>
-        </div>
-        <div class="referrer-analytics-box referrer-analytics-box-referrers-pie">
-          <h3><?php _e( 'Top ' . $chart_limit . ' Referrers', 'referrer-analytics' ); ?></h3>
-          <div class="inside">
-            <?php if ( $referrer_totals ): ?>
-              <canvas id="referrer-analytics-pie-referrers"></canvas>
-              <script>
-              <?php
-              $labels = [];
-              $data   = [];
-              $count  = 0;
-              foreach( $referrer_totals as $key => $value ):
-                $count++;
-                if ( $count > $chart_limit ): break; endif;
-
-                $labels[] = $value['name'];
-                $data[]   = $value['count'];
-                $colors[] = $predefined_colors[ $count ];
-              endforeach;
-              ?>
-              var referrers = document.getElementById('referrer-analytics-pie-referrers');
-              var referrerAnalyticsPie = new Chart(referrers, {
-                type: 'pie',
-                data: {
-                  labels: <?php echo json_encode( $labels ); ?>,
-                  datasets: [{
-                    data: <?php echo json_encode( $data ); ?>,
-                    backgroundColor: <?php echo json_encode( $colors ); ?>,
-                    borderWidth: 0,
-                    borderColor: '#f1f1f1'
-                  }],
-                },
-                options: {
-                  legend: {
-                    position: 'right',
-                    fullWidth: false
-                  }
-                }
-              });
-              </script>
-            <?php else: ?>
-              <?php _e( 'No data to report yet.', 'referrer-analytics' ); ?>
-            <?php endif; ?>
-          </div>
-        </div>
-        <div class="referrer-analytics-box referrer-analytics-box-type-pie">
-          <h3><?php _e( 'Top ' . $chart_limit . ' Referrer Types', 'referrer-analytics' ); ?></h3>
-          <div class="inside">
-            <?php if ( $type_totals ): ?>
-              <canvas id="referrer-analytics-pie-types"></canvas>
-              <script>
-              <?php
-              $labels = [];
-              $data   = [];
-              $count  = 0;
-              foreach( $type_totals as $key => $value ):
-                $count++;
-                if ( $count > $chart_limit ): break; endif;
-
-                $labels[] = $key;
-                $data[]   = $value;
-                $colors[] = $predefined_colors[ $count ];
-              endforeach;
-              ?>
-              var types = document.getElementById('referrer-analytics-pie-types');
-              var referrerAnalyticsPie = new Chart(types, {
-                type: 'pie',
-                data: {
-                  labels: <?php echo json_encode( $labels ); ?>,
-                  datasets: [{
-                    data: <?php echo json_encode( $data ); ?>,
-                    backgroundColor: <?php echo json_encode( $colors ); ?>,
-                    borderWidth: 0,
-                    borderColor: '#f1f1f1'
-                  }],
-                },
-                options: {
-                  legend: {
-                    position: 'right',
-                    fullWidth: false
-                  }
-                }
-              });
-              </script>
-            <?php else: ?>
-              <?php _e( 'No data to report yet.', 'referrer-analytics' ); ?>
-            <?php endif; ?>
-          </div>
-        </div>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/referrers-pie-chart.php'; ?>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/types-pie-chart.php'; ?>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/popular-7-day-referrers.php'; ?>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/most-popular-referrers.php'; ?>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/most-popular-types.php'; ?>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/popular-7-day-destinations.php'; ?>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/most-popular-destinations.php'; ?>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/not-available-referrers.php'; ?>
       </div>
     <?php endif; ?>
 
     <h2><?php _e( 'Referrer Log', 'referrer-analytics' ); ?></h2>
 
-    <a href="<?php echo admin_url( 'options-general.php?page=referrer-analytics-log&delete=log' ); ?>" style="float: right" class="button button-primary"><?php _e( 'Delete All Log Entries', 'referrer-analytics' ); ?></a>
+    <a href="<?php echo admin_url( 'options-general.php?page=referrer-analytics&delete=log' ); ?>" style="float: right" class="button button-primary"><?php _e( 'Delete All Log Entries', 'referrer-analytics' ); ?></a>
 
     <?php
     /**
@@ -267,9 +130,9 @@ function referrer_analytics_options_page() {
     // Setup page parameters
     $current_page = $table_data->get_pagenum();
     $current_page = (isset($current_page)) ? $current_page : 1;
-    $paged        = (isset($_GET['page'])) ? $_GET['page'] : $current_page;
-    $paged        = (isset($_GET['paged'])) ? $_GET['paged'] : $current_page;
-    $paged        = (isset($args['paged'])) ? $args['paged'] : $paged;
+    $paged        = ( isset( $_GET['page'] ) ) ? absint( $_GET['page'] ) : $current_page;
+    $paged        = ( isset( $_GET['paged'] ) ) ? absint(  $_GET['paged'] ) : $current_page;
+    $paged        = ( isset( $args['paged'] ) ) ? $args['paged'] : $paged;
 
     // Fetch, prepare, sort, and filter our data...
     $table_data->prepare_items();
@@ -299,7 +162,7 @@ function referrer_analytics_options_page() {
  function referrer_analytics_admin_init() {
   if ( ! empty( $_REQUEST['delete'] ) && 'log' === $_REQUEST['delete'] ) {
     referrer_analytics_delete_log();
-    wp_redirect( admin_url( 'options-general.php?page=referrer-analytics-log' ) );
+    wp_redirect( admin_url( 'options-general.php?page=referrer-analytics' ) );
     exit();
   }
 
@@ -383,7 +246,7 @@ function referrer_analytics_options_page() {
     'label_for' => 'logging',
     'type'      => 'checkbox',
     'multi'     => false,
-    'desc'      => 'Enables logging of user referrers and provides an admin interface to view statistics.',
+    'desc'      => 'Enables logging of user referrers and provides an admin interface to view statistics. <strong>Not recommended on sites with a large amount of traffic</strong>.',
     'options'   => [
       'enabled' => __( 'Enabled', 'referrer_analytics' )
     ]

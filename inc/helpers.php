@@ -39,7 +39,7 @@ if ( ! function_exists( 'referrer_analytics_sync_log' ) ) {
           }
 
           // Check referrer primary url
-          if( $entry->referrer_primary_url != $referrer['primary_url'] ) {
+          if( ! empty( $referrer['primary_url'] ) && $entry->referrer_primary_url != $referrer['primary_url'] ) {
             $updates['referrer_primary_url'] = $referrer['primary_url'];
           }
 
@@ -352,11 +352,16 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
   function referrer_analytics_referrers() {
     return [
       // Google
+      [ 'host' => 'www.google.at', 'type' => 'organic', 'name' => 'Google (Austria)', 'primary_url' => 'https://www.google.at/' ],
+      [ 'host' => 'www.google.ca', 'type' => 'organic', 'name' => 'Google (Canada)', 'primary_url' => 'https://www.google.ca/' ],
       [ 'host' => 'www.google.com', 'type' => 'organic', 'name' => 'Google', 'primary_url' => 'https://www.google.com/' ],
       [ 'host' => 'www.google.cl', 'type' => 'organic', 'name' => 'Google (Chile)', 'primary_url' => 'https://www.google.cl/' ],
       [ 'host' => 'www.google.ru', 'type' => 'organic', 'name' => 'Google (Russia)', 'primary_url' => 'https://www.google.ru/' ],
       [ 'host' => 'www.google.fr', 'type' => 'organic', 'name' => 'Google (France)', 'primary_url' => 'https://www.google.fr/' ],
+      [ 'host' => 'www.google.hu', 'type' => 'organic', 'name' => 'Google (Hungary)', 'primary_url' => 'https://www.google.hu/' ],
       [ 'host' => 'www.google.in', 'type' => 'organic', 'name' => 'Google (India)', 'primary_url' => 'https://www.google.in/' ],
+      [ 'host' => 'www.google.it', 'type' => 'organic', 'name' => 'Google (Italy)', 'primary_url' => 'https://www.google.it/' ],
+      [ 'host' => 'www.google.com.ph', 'type' => 'organic', 'name' => 'Google (Philippines)', 'primary_url' => 'https://www.google.com.ph/' ],
       [ 'host' => 'www.google.co.in', 'type' => 'organic', 'name' => 'Google (India)', 'primary_url' => 'https://www.google.in/' ],
       [ 'host' => 'www.google.co.uk', 'type' => 'organic', 'name' => 'Google (United Kingdom)', 'primary_url' => 'https://www.google.co.uk/' ],
       [ 'host' => 'www.google.ch', 'type' => 'organic', 'name' => 'Google (Switzerland)', 'primary_url' => 'https://www.google.ch/' ],
@@ -370,6 +375,16 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'www.google.dk', 'type' => 'organic', 'name' => 'Google (Denmark)', 'primary_url' => 'https://www.google.dk/' ],
       [ 'host' => 'www.google.de', 'type' => 'organic', 'name' => 'Google (Germany)', 'primary_url' => 'https://www.google.de/' ],
       [ 'host' => 'www.google.pl', 'type' => 'organic', 'name' => 'Google (Poland)', 'primary_url' => 'https://www.google.pl/' ],
+      [ 'host' => 'www.google.com.tr', 'type' => 'organic', 'name' => 'Google (Turkey)', 'primary_url' => 'https://www.google.com.tr/' ],
+      [ 'host' => 'www.google.com.tw', 'type' => 'organic', 'name' => 'Google (Taiwan)', 'primary_url' => 'https://www.google.com.tw/' ],
+      [ 'host' => 'www.google.com.vn', 'type' => 'organic', 'name' => 'Google (Vietnam)', 'primary_url' => 'https://www.google.com.vn/' ],
+      [ 'host' => 'www.google.hn', 'type' => 'organic', 'name' => 'Google (Honduras)', 'primary_url' => 'https://www.google.hn/' ],
+      [ 'host' => 'www.google.com.sg', 'type' => 'organic', 'name' => 'Google (Singapore)', 'primary_url' => 'https://www.google.com.sg/' ],
+      [ 'host' => 'www.google.com.hk', 'type' => 'organic', 'name' => 'Google (Hong Kong)', 'primary_url' => 'https://www.google.com.hk/' ],
+      [ 'host' => 'www.google.com.mx', 'type' => 'organic', 'name' => 'Google (Mexico)', 'primary_url' => 'https://www.google.com.mx/' ],
+      [ 'host' => 'support.google.com', 'type' => 'organic', 'name' => 'Google Support', 'primary_url' => 'https://support.google.com/' ],
+      [ 'host' => 'cse.google.com', 'type' => 'organic', 'name' => 'Google (Creator Search)', 'primary_url' => 'https://cse.google.com/' ],
+      [ 'host' => 'keep.google.com', 'type' => 'organic', 'name' => 'Google Keep', 'primary_url' => 'https://keep.google.com/u/0/' ],
 
       // Bing
       [ 'host' => 'www.bing.com', 'type' => 'organic', 'name' => 'Bing', 'primary_url' => 'https://www.bing.com/' ],
@@ -386,6 +401,7 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'baidu.com', 'type' => 'organic', 'name' => 'Baidu', 'primary_url' => 'http://www.baidu.com/' ],
       [ 'host' => 'www.ecosia.org', 'type' => 'organic', 'name' => 'Ecosia', 'primary_url' => 'https://www.ecosia.org/' ],
       [ 'host' => 'www.qwant.com', 'type' => 'organic', 'name' => 'Qwant', 'primary_url' => 'https://www.qwant.com/' ],
+      [ 'host' => 'go.mail.ru', 'type' => 'organic', 'name' => 'Поиск Mail.Ru', 'primary_url' => 'https://go.mail.ru/' ],
 
       // Social media
       [ 'host' => 't.co', 'type' => 'social', 'name' => 'Twitter', 'primary_url' => 'https://twitter.com/' ],
@@ -393,6 +409,13 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'www.linkedin.com', 'type' => 'social', 'name' => 'LinkedIn', 'primary_url' => 'https://www.linkedin.com/' ],
       [ 'host' => 'www.instagram.com', 'type' => 'social', 'name' => 'Instagram', 'primary_url' => 'https://www.instagram.com/' ],
       [ 'host' => 'www.youtube.com', 'type' => 'social', 'name' => 'YouTube', 'primary_url' => 'https://www.youtube.com/' ],
+      [ 'host' => 'www.reddit.com', 'type' => 'social', 'name' => 'reddit', 'primary_url' => 'https://www.reddit.com/' ],
+      [ 'host' => 'l.messenger.com', 'type' => 'social', 'name' => 'Facebook (Messenger)', 'primary_url' => 'https://www.messenger.com/' ],
+
+      // WordPress
+      [ 'host' => 'wordpress.org', 'type' => 'referral', 'name' => 'WordPress', 'primary_url' => 'https://wordpress.org/' ],
+      [ 'host' => 'fr.wordpress.org', 'type' => 'referral', 'name' => 'WordPress (France)', 'primary_url' => 'https://fr.wordpress.org/' ],
+      [ 'host' => 'nl.wordpress.org', 'type' => 'referral', 'name' => 'WordPress (Netherlands)', 'primary_url' => 'https://nl.wordpress.org/' ],
 
       // Others
       [ 'host' => 'site.ru', 'type' => 'bot', 'name' => 'site.ru', 'flag' => true ],
@@ -408,8 +431,8 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'forum.bubble.io', 'type' => 'referral', 'name' => 'Bubble Forum', 'primary_url' => 'https://forum.bubble.io/' ],
       [ 'host' => 'www.benmarshall.me', 'type' => 'referral', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
       [ 'host' => 'benmarshall.me', 'type' => 'referral', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
+      [ 'host' => '35.209.238.75', 'type' => 'referral', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
       [ 'host' => 'github.com', 'type' => 'referral', 'name' => 'GitHub', 'primary_url' => 'https://github.com/' ],
-      [ 'host' => 'wordpress.org', 'type' => 'referral', 'name' => 'WordPress', 'primary_url' => 'https://wordpress.org/' ],
       [ 'host' => 'school.nextacademy.com', 'type' => 'referral', 'name' => 'NEXT Academy', 'primary_url' => 'https://school.nextacademy.com/' ],
       [ 'host' => 'www.soliddigital.com', 'type' => 'referral', 'name' => 'Solid Digital', 'primary_url' => 'https://www.soliddigital.com/' ],
       [ 'host' => 'www.benellile.com', 'type' => 'referral', 'name' => 'Benlli', 'primary_url' => 'https://www.benellile.com/' ],
@@ -417,6 +440,25 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'knowledge.exlibrisgroup.com', 'type' => 'referral', 'name' => 'Ex Libris Knowledge Center', 'primary_url' => 'https://knowledge.exlibrisgroup.com/' ],
       [ 'host' => 'anti-crisis-seo.com', 'type' => 'bot', 'name' => 'SEO Anti-Crisis Tool', 'primary_url' => 'http://anti-crisis-seo.com' ],
       [ 'host' => 'minepub.net', 'type' => 'referral', 'name' => 'Minepub', 'primary_url' => 'https://minepub.net/' ],
+      [ 'host' => 'ricoshae.com.au', 'type' => 'referral', 'name' => 'Ricoshae', 'primary_url' => 'https://ricoshae.com.au/' ],
+      [ 'host' => 'bayriverrealty.com', 'type' => 'referral', 'name' => 'Bay River Realty', 'primary_url' => 'http://bayriverrealty.com/' ],
+      [ 'host' => 'forums.athemes.com', 'type' => 'referral', 'name' => 'aThemes Forums', 'primary_url' => 'https://forums.athemes.com/' ],
+      [ 'host' => 'timnath.org', 'type' => 'referral', 'name' => 'Timnath, CO', 'primary_url' => 'https://timnath.org/' ],
+      [ 'host' => 'spr.com', 'type' => 'referral', 'name' => 'SPR', 'primary_url' => 'https://spr.com/' ],
+      [ 'host' => 'michaelbox.net', 'type' => 'referral', 'name' => 'Michael Beckwith', 'primary_url' => 'https://michaelbox.net/' ],
+      [ 'host' => 'forum.zwiicms.com', 'type' => 'referral', 'name' => 'Support de Zwii', 'primary_url' => 'http://forum.zwiicms.com/' ],
+      [ 'host' => 'wohnparc.de', 'type' => 'referral', 'name' => 'wohnparc.de', 'primary_url' => 'https://wohnparc.de/' ],
+      [ 'host' => 'scottdeluzio.com', 'type' => 'referral', 'name' => 'Scott DeLuzio', 'primary_url' => 'https://scottdeluzio.com/' ],
+      [ 'host' => 'theme.co', 'type' => 'referral', 'name' => 'Theme.co', 'primary_url' => 'https://theme.co/' ],
+      [ 'host' => 'luatduonggia.vn', 'type' => 'referral', 'name' => 'Công ty Luật Dương Gia', 'primary_url' => 'https://luatduonggia.vn/' ],
+      [ 'host' => 'app.net', 'type' => 'referral', 'name' => 'App.net', 'primary_url' => 'https://app.net/' ],
+      [ 'host' => 'www.gynecomastia.org', 'type' => 'referral', 'name' => 'Gynecomastia.org', 'primary_url' => 'https://www.gynecomastia.org/' ],
+      [ 'host' => 'aljlaw.com', 'type' => 'referral', 'name' => 'The Estate Planning and Elder Law Group', 'primary_url' => 'http://aljlaw.com/' ],
+      [ 'host' => 'rrhelections.com', 'type' => 'referral', 'name' => 'RRH Elections', 'primary_url' => 'https://rrhelections.com/' ],
+      [ 'host' => 'bit.ly', 'type' => 'referral', 'name' => 'Bitly', 'primary_url' => 'https://bitly.com/' ],
+      [ 'host' => 'feedly.com', 'type' => 'referral', 'name' => 'Feedly', 'primary_url' => 'https://feedly.com/i/welcome' ],
+      [ 'host' => 'www.feedly.com', 'type' => 'referral', 'name' => 'Feedly', 'primary_url' => 'https://feedly.com/i/welcome' ],
+      [ 'host' => '109.199.107.148', 'type' => 'referral', 'name' => 'SiteGround', 'primary_url' => 'https://www.siteground.com/' ],
 
       // Edge cases
       [ 'host' => 'PANTHEON_STRIPPED', 'type' => 'direct', 'name' => 'Direct Traffic' ],

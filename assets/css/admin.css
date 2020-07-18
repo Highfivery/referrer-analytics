@@ -1,3 +1,53 @@
+.referrer-analytics-callout {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #ccd0d4;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-wrap: wrap;
+  padding: 20px;
+}
+
+.referrer-analytics-callout h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.referrer-analytics-callout p {
+  font-size: 14px;
+  margin-top: 0;
+}
+
+.referrer-analytics-callout-actions {
+  display: block;
+  width: 100%;
+}
+
+.referrer-analytics-callout-actions a.button {
+  display: block;
+  margin-bottom: 3px;
+  text-align: center;
+  width: 100%;
+}
+
+.referrer-analytics-callout-actions a:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 960px) {
+  .referrer-analytics-callout {
+    flex-wrap: nowrap;
+  }
+
+  .referrer-analytics-callout-actions {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: 50px;
+    width: auto;
+  }
+}
+
+
 .referrer-analytics-referrer-option {
   margin-bottom: 0.3rem;
 }
@@ -40,6 +90,7 @@
   margin-bottom: 16px;
   margin-left: 8px;
   margin-right: 8px;
+  overflow: hidden;
   width: calc(100% - 18px);
 }
 
@@ -55,13 +106,23 @@
   padding: 12px;
 }
 
+.referrer-analytics-box-unknown-referrers ol {
+  columns: 4;
+}
+
 @media (min-width: 768px) {
   .referrer-analytics-box {
     width: calc(100% / 3 - 18px);
   }
 
   .referrer-analytics-box-referrers-pie,
-  .referrer-analytics-box-type-pie {
+  .referrer-analytics-box-type-pie,
+  .referrer-analytics-box-popular-7-day-destinations,
+  .referrer-analytics-box-popular-destinations {
     width: calc(100% / 2 - 18px);
+  }
+
+  .referrer-analytics-box-unknown-referrers {
+    width: calc(100% - 18px);
   }
 }

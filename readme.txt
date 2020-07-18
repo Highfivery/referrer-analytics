@@ -1,11 +1,11 @@
 === Referrer Analytics ===
 Contributors: bmarshall511
 Tags: analytics, referrer, google analytics, google analytics add-on, statistics, stats
-Donate link: https://benmarshall.me
+Donate link: https://benmarshall.me/donate/?utm_source=referrer_analytics&utm_medium=wordpress_repo&utm_campaign=donate
 Requires at least: 5.2
 Tested up to: 5.4.2
 Requires PHP: 7.1
-Stable tag: 1.4.1
+Stable tag: 1.5.0
 License: GNU GPLv3
 License URI: https://choosealicense.com/licenses/gpl-3.0/
 
@@ -22,7 +22,7 @@ Referrer Analytics is a powerful tool allowing site admins to get valuable insig
 * Date & time users were referred
 * IP addresses of referred users with quick links for [geolocation information](https://benmarshall.me/html5-geolocation/)
 * Ability to track authenticated users that come from a referrer
-* The type of referring traffic: <em>organic, bots, backlinks, etc.</em>
+* The type of referring traffic: <em>organic, bots, referral, etc.</em>
 * Referring hostnames with human-readable versions such as <em>Google (United Kingdom)</em>
 * Referred destination URLs & top landing pages from referrers
 * Toplists of referrers, types of referrers and popular landing pages
@@ -96,6 +96,12 @@ Due to some server hosts like [Pantheon](https://pantheon.io/docs/pantheon_strip
 2. Referrer Analytics settings screen
 
 == Changelog ==
+
+= v1.5.0 =
+
+* Fixed sorting issue on the log table
+* Added additional pre-defined referrer hosts
+* Added more charts
 
 = v1.4.1 =
 
