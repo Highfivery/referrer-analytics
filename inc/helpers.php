@@ -416,6 +416,7 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'in.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (India)', 'primary_url' => 'https://in.search.yahoo.com/' ],
       [ 'host' => 'tw.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (Taiwan)', 'primary_url' => 'https://tw.search.yahoo.com/' ],
       [ 'host' => 'au.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (Australia)', 'primary_url' => 'https://search.yahoo.com/' ],
+      [ 'host' => 'finance.yahoo.com', 'type' => 'referral', 'name' => 'Yahoo Finance', 'primary_url' => 'https://finance.yahoo.com/' ],
 
       // Other search engines
       [ 'host' => 'duckduckgo.com', 'type' => 'organic', 'name' => 'DuckDuckGo', 'primary_url' => 'https://duckduckgo.com/' ],
