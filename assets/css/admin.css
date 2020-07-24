@@ -118,11 +118,14 @@
   .referrer-analytics-box-referrers-pie,
   .referrer-analytics-box-type-pie,
   .referrer-analytics-box-popular-7-day-destinations,
-  .referrer-analytics-box-popular-destinations {
+  .referrer-analytics-box-popular-destinations,
+  .referrer-analytics-box-types-line-chart,
+  .referrer-analytics-box-referrers-line-chart {
     width: calc(100% / 2 - 18px);
   }
 
   .referrer-analytics-box-unknown-referrers {
     width: calc(100% - 18px);
   }
+
 }

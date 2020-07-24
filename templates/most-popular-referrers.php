@@ -27,6 +27,9 @@
             <?php if ( ! empty( $entry['flag'] ) && $entry['flag'] ): ?>
               <span style="color: #ca4a1f;"><?php _e( 'potentially malicious, consider blocking', 'referrer-analytics' ); ?></span>
             <?php endif; ?>
+            <?php if ( ! empty( $entry['inferred'] ) && $entry['inferred'] ): ?>
+              <span style="color: #fcb214;"><?php _e( 'inferred from the UTM source', 'referrer-analytics' ); ?></span>
+            <?php endif; ?>
           </li>
         <?php endforeach; ?>
       </ol>

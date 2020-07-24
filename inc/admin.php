@@ -91,7 +91,7 @@ function referrer_analytics_options_page() {
 
     <div class="referrer-analytics-callout">
       <div class="referrer-analytics-callout-content">
-        <h2><?php _e( 'Are you a fan of the <a href="https://wordpress.org/plugins/referrer-analytics/?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" target="_blank">Referrer Analytics</a> plugin? Show your support.', 'referrer-analytics' ); ?></h2>
+        <h2><?php _e( 'Are you a fan of the <a href="https://benmarshall.me/referrer-analytics/?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" target="_blank">Referrer Analytics</a> plugin? Show your support.', 'referrer-analytics' ); ?></h2>
         <p><?php _e( 'Help support the continued development of the Referrer Analytics plugin by <a href="https://benmarshall.me/donate?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" target="_blank">donating today</a>. Your donation goes towards the time it takes to develop new features &amp; updates, but also helps provide pro bono work for nonprofits. <a href="https://benmarshall.me/donate?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" target="_blank">Learn more</a>.', 'referrer-analytics' ); ?></p>
       </div>
       <div class="referrer-analytics-callout-actions">
@@ -104,6 +104,8 @@ function referrer_analytics_options_page() {
     <?php if ( $current_page === 1 ): ?>
       <h2><?php _e( 'Statistics', 'referrer-analytics' ); ?></h2>
       <div class="referrer-analytics-boxes">
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/referrers-line-chart.php'; ?>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/types-line-chart.php'; ?>
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/referrers-pie-chart.php'; ?>
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/types-pie-chart.php'; ?>
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/popular-7-day-referrers.php'; ?>
@@ -204,7 +206,7 @@ function referrer_analytics_options_page() {
     'label_for' => 'url_referrer_fallback',
     'type'      => 'checkbox',
     'multi'     => false,
-    'desc'      => 'If <code>$_SERVER[\'HTTP_REFERER\']</code> is unavailable (see the <a href="https://wordpress.org/plugins/referrer-analytics/" target="_blank" rel="noopener noreferrer">plugin FAQ</a> for more information), attempt to get the referrer from URL parameters.',
+    'desc'      => 'If <code>$_SERVER[\'HTTP_REFERER\']</code> is unavailable (see the <a href="https://wordpress.org/plugins/referrer-analytics/" target="_blank" rel="noopener noreferrer">plugin FAQ</a> for more information), attempt to get the referrer from the <code>utm_source</code> URL parameter.',
     'options'   => [
       'enabled' => __( 'Enabled', 'referrer_analytics' )
     ]

@@ -5,7 +5,7 @@ Donate link: https://benmarshall.me/donate/?utm_source=referrer_analytics&utm_me
 Requires at least: 5.2
 Tested up to: 5.4.2
 Requires PHP: 7.1
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 License: GNU GPLv3
 License URI: https://choosealicense.com/licenses/gpl-3.0/
 
@@ -96,6 +96,13 @@ Due to some server hosts like [Pantheon](https://pantheon.io/docs/pantheon_strip
 2. Referrer Analytics settings screen
 
 == Changelog ==
+
+= v1.6.0 =
+
+* Added additional pre-defined referrer hosts
+* Added "(UTM Source)" to referrers that use the "URL Referrer Fallback"
+* Added more charts to the Referrer Analytics dashboard
+* Added a "inferred" attribute to known referrers that are defined by the `utm_source`
 
 = v1.5.0 =
 

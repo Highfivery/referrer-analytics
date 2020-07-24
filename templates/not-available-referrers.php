@@ -32,7 +32,7 @@ if ( $log ) {
         $cnt = 0;
         foreach( $unknown as $host => $count ):
         $cnt++;
-        if ( $cnt > 50 ) { break; }
+        if ( $cnt > 100 ) { break; }
         ?>
           <li>
             <?php echo $host . ' &mdash; ' . $count; ?>

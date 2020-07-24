@@ -25,6 +25,8 @@ if ( ! function_exists( 'referrer_analytics_sync_log' ) ) {
 
       foreach( $referrers as $k => $referrer ) {
         if( $referrer['host'] == $entry->referrer_host ) {
+          $found_match = true;
+
           // Match found, update accordingly
           $updates = [];
 
@@ -48,9 +50,7 @@ if ( ! function_exists( 'referrer_analytics_sync_log' ) ) {
             $wpdb->update( $table_name, $updates, [ 'referrer_id' => $entry->referrer_id ] );
           }
 
-          $found_match = true;
-
-          continue;
+          break;
         }
       }
 
@@ -219,7 +219,7 @@ if ( ! function_exists( 'referrer_analytics_get_referrer' ) ) {
         // URL referrer parameter found
         $url_referrer_source = $current_url['query']['utm_source'];
 
-        $referrer['host'] = $url_referrer_source;
+        $referrer['host'] = $url_referrer_source . ' (UTM Source)';
       } else {
         // No referrer found
         return false;
@@ -385,6 +385,23 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'support.google.com', 'type' => 'organic', 'name' => 'Google Support', 'primary_url' => 'https://support.google.com/' ],
       [ 'host' => 'cse.google.com', 'type' => 'organic', 'name' => 'Google (Creator Search)', 'primary_url' => 'https://cse.google.com/' ],
       [ 'host' => 'keep.google.com', 'type' => 'organic', 'name' => 'Google Keep', 'primary_url' => 'https://keep.google.com/u/0/' ],
+      [ 'host' => 'www.google.co.id', 'type' => 'organic', 'name' => 'Google (Indonesia)', 'primary_url' => 'https://www.google.co.id/' ],
+      [ 'host' => 'www.google.co.il', 'type' => 'organic', 'name' => 'Google (Israel)', 'primary_url' => 'https://www.google.co.il/' ],
+      [ 'host' => 'search.google.com', 'type' => 'organic', 'name' => 'Google', 'primary_url' => 'https://www.google.com/' ],
+      [ 'host' => 'www.google.cz', 'type' => 'organic', 'name' => 'Google (Czechia)', 'primary_url' => 'https://www.google.cz/' ],
+      [ 'host' => 'www.google.co.jp', 'type' => 'organic', 'name' => 'Google (Japan)', 'primary_url' => 'https://www.google.co.jp/' ],
+      [ 'host' => 'www.google.pt', 'type' => 'organic', 'name' => 'Google (Portugal)', 'primary_url' => 'https://www.google.com.co/' ],
+      [ 'host' => 'www.google.com.co', 'type' => 'organic', 'name' => 'Google (Colombia)', 'primary_url' => 'https://www.google.pt/' ],
+      [ 'host' => 'www.google.ae', 'type' => 'organic', 'name' => 'Google (United Arab Emirates)', 'primary_url' => 'https://www.google.ae/' ],
+      [ 'host' => 'www.google.com.ua', 'type' => 'organic', 'name' => 'Google (Ukraine)', 'primary_url' => 'https://www.google.com.ua/' ],
+      [ 'host' => 'www.google.co.za', 'type' => 'organic', 'name' => 'Google (South Africa)', 'primary_url' => 'https://www.google.co.za/' ],
+      [ 'host' => 'www.google.nl', 'type' => 'organic', 'name' => 'Google (Netherlands)', 'primary_url' => 'https://www.google.nl/' ],
+      [ 'host' => 'www.google.fi', 'type' => 'organic', 'name' => 'Google (Finland)', 'primary_url' => 'https://www.google.fi/' ],
+      [ 'host' => 'www.google.kz', 'type' => 'organic', 'name' => 'Google (Kazakhstan)', 'primary_url' => 'https://www.google.kz/' ],
+      [ 'host' => 'www.google.com.my', 'type' => 'organic', 'name' => 'Google (Malaysia)', 'primary_url' => 'https://www.google.com.my/' ],
+      [ 'host' => 'www.google.se', 'type' => 'organic', 'name' => 'Google (Sweden)', 'primary_url' => 'https://www.google.se/' ],
+      [ 'host' => 'www.google.es', 'type' => 'organic', 'name' => 'Google (Spain)', 'primary_url' => 'https://www.google.es/' ],
+      [ 'host' => 'www.google.no', 'type' => 'organic', 'name' => 'Google (Norway)', 'primary_url' => 'https://www.google.no/' ],
 
       // Bing
       [ 'host' => 'www.bing.com', 'type' => 'organic', 'name' => 'Bing', 'primary_url' => 'https://www.bing.com/' ],
@@ -395,6 +412,10 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo', 'primary_url' => 'https://www.yahoo.com/' ],
       [ 'host' => 'fr.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (France)', 'primary_url' => 'https://fr.search.yahoo.com/' ],
       [ 'host' => 'uk.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (United Kingdom)', 'primary_url' => 'https://uk.search.yahoo.com/' ],
+      [ 'host' => 'us.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo', 'primary_url' => 'https://us.search.yahoo.com/' ],
+      [ 'host' => 'in.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (India)', 'primary_url' => 'https://in.search.yahoo.com/' ],
+      [ 'host' => 'tw.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (Taiwan)', 'primary_url' => 'https://tw.search.yahoo.com/' ],
+      [ 'host' => 'au.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (Australia)', 'primary_url' => 'https://search.yahoo.com/' ],
 
       // Other search engines
       [ 'host' => 'duckduckgo.com', 'type' => 'organic', 'name' => 'DuckDuckGo', 'primary_url' => 'https://duckduckgo.com/' ],
@@ -402,9 +423,11 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'www.ecosia.org', 'type' => 'organic', 'name' => 'Ecosia', 'primary_url' => 'https://www.ecosia.org/' ],
       [ 'host' => 'www.qwant.com', 'type' => 'organic', 'name' => 'Qwant', 'primary_url' => 'https://www.qwant.com/' ],
       [ 'host' => 'go.mail.ru', 'type' => 'organic', 'name' => 'Поиск Mail.Ru', 'primary_url' => 'https://go.mail.ru/' ],
+      [ 'host' => 'search.aol.com', 'type' => 'organic', 'name' => 'AOL', 'primary_url' => 'https://search.aol.com/' ],
 
       // Social media
       [ 'host' => 't.co', 'type' => 'social', 'name' => 'Twitter', 'primary_url' => 'https://twitter.com/' ],
+      [ 'host' => 'twitter.com', 'type' => 'social', 'name' => 'Twitter', 'primary_url' => 'https://twitter.com/' ],
       [ 'host' => 'www.facebook.com', 'type' => 'social', 'name' => 'Facebook', 'primary_url' => 'https://www.facebook.com/' ],
       [ 'host' => 'www.linkedin.com', 'type' => 'social', 'name' => 'LinkedIn', 'primary_url' => 'https://www.linkedin.com/' ],
       [ 'host' => 'www.instagram.com', 'type' => 'social', 'name' => 'Instagram', 'primary_url' => 'https://www.instagram.com/' ],
@@ -459,9 +482,32 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'feedly.com', 'type' => 'referral', 'name' => 'Feedly', 'primary_url' => 'https://feedly.com/i/welcome' ],
       [ 'host' => 'www.feedly.com', 'type' => 'referral', 'name' => 'Feedly', 'primary_url' => 'https://feedly.com/i/welcome' ],
       [ 'host' => '109.199.107.148', 'type' => 'referral', 'name' => 'SiteGround', 'primary_url' => 'https://www.siteground.com/' ],
+      [ 'host' => 'www.sitepoint.com', 'type' => 'referral', 'name' => 'SitePoint', 'primary_url' => 'https://www.sitepoint.com/' ],
+      [ 'host' => 'stackoverflow.com', 'type' => 'referral', 'name' => 'Stack Overflow', 'primary_url' => 'https://stackoverflow.com/' ],
+      [ 'host' => 'generatepress.com', 'type' => 'referral', 'name' => 'GeneratePress', 'primary_url' => 'https://generatepress.com/' ],
+      [ 'host' => 'www.wpmeta.org', 'type' => 'referral', 'name' => 'WPMeta', 'primary_url' => 'http://www.wpmeta.org/' ],
+      [ 'host' => 'ask.csdn.net', 'type' => 'referral', 'name' => '编程技术问答-CSDN问答频道', 'primary_url' => 'https://ask.csdn.net/' ],
+      [ 'host' => 'www.hipwf.com', 'type' => 'referral', 'name' => 'Heidelberg International Professional Women\'s Forum', 'primary_url' => 'https://www.hipwf.com/' ],
+      [ 'host' => 'www.nanoframework.net', 'type' => 'referral', 'name' => 'nanoFramework', 'primary_url' => 'https://www.nanoframework.net/' ],
+      [ 'host' => 'data.vtcdns.com', 'type' => 'referral', 'name' => 'data.vtcdns.com', 'primary_url' => 'http://data.vtcdns.com/', 'flag' => true ],
+      [ 'host' => 'stash.trusted.visa.com', 'type' => 'bot', 'name' => 'stash.trusted.visa.com' ],
+      [ 'host' => 'support.advancedcustomfields.com', 'type' => 'referral', 'name' => 'ACF Support', 'primary_url' => 'https://support.advancedcustomfields.com/' ],
+      [ 'host' => 'austinjeeppeople.com', 'type' => 'referral', 'name' => 'Austin JeepPeople', 'primary_url' => 'https://austinjeeppeople.com/' ],
+      [ 'host' => 'yandex.ru', 'type' => 'organic', 'name' => 'Yandex', 'primary_url' => 'https://yandex.ru/' ],
+      [ 'host' => 'confluence.godaddy.com', 'type' => 'referral', 'name' => 'GoDaddy (Confluence)', 'primary_url' => 'https://godaddy.okta.com/login/login.htm' ],
+      [ 'host' => 'pob.ng', 'type' => 'referral', 'name' => 'Princesage Online Branding', 'primary_url' => 'https://pob.ng/' ],
+      [ 'host' => 'theabcn.org', 'type' => 'referral', 'name' => 'American Board of Clinical Neuropsychology', 'primary_url' => 'https://theabcn.org/' ],
+      [ 'host' => 'lenny.pl', 'type' => 'referral', 'name' => 'Portal Lenny', 'primary_url' => 'http://lenny.pl/' ],
+      [ 'host' => 'www.phase2technology.com', 'type' => 'referral', 'name' => 'Phase2', 'primary_url' => 'https://www.phase2technology.com/' ],
 
       // Edge cases
       [ 'host' => 'PANTHEON_STRIPPED', 'type' => 'direct', 'name' => 'Direct Traffic' ],
+      [ 'host' => 'localhost', 'type' => 'intranet', 'name' => 'localhost' ],
+      [ 'host' => 'benmarshall.local', 'type' => 'intranet', 'name' => 'Ben Marshall' ],
+
+      // UTM sources
+      [ 'host' => 'jobify plugin (UTM Source) ', 'type' => 'referral', 'name' => 'WordPress.org (Jobify plugin)', 'primary_url' => 'https://wordpress.org/plugins/jobify/', 'inferred' => true ],
+      [ 'host' => 'wordpress_zero_spam (UTM Source) ', 'type' => 'referral', 'name' => 'WordPress.org (WordPress Zero Spam plugin)', 'primary_url' => 'https://wordpress.org/plugins/zero-spam/', 'inferred' => true ],
     ];
   }
 }
