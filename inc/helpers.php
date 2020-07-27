@@ -7,13 +7,65 @@
  */
 
 /**
+ * Return the table name or an array of available tables.
+ *
+ * @since 1.7.0
+ *
+ * @param string $table The table key to return the table name.
+ * @return string/array The table name or array of tables.
+ */
+if ( ! function_exists( 'referrer_analytics_tables' ) ) {
+  function referrer_analytics_tables( $table = false ) {
+    global $wpdb;
+
+    $tables = [
+      'log' => $wpdb->prefix . 'referrer_analytics'
+    ];
+
+    if ( ! $table ) {
+      return $tables;
+    } elseif( ! empty( $tables[ $table ] ) ) {
+      return $tables[ $table ];
+    }
+
+    return false;
+  }
+}
+
+/**
+ * Check if the referrer is an external source.
+ *
+ * @since 1.7.0
+ *
+ * @param string $referrer_host The hostname of the referrer.
+ * @return boolean true if the referrer is an external source.
+ */
+if ( ! function_exists( 'referrer_analytics_is_external' ) ) {
+  function referrer_analytics_is_external( $referrer_host ) {
+    $current_url = referrer_analytics_current_url();
+
+    if (
+      ( ! empty( $_SERVER['HTTP_HOST'] ) &&  $_SERVER['HTTP_HOST'] == $referrer_host ) ||
+      $current_url['host'] == $referrer_host ||
+      // Check www versions
+      ( 'www.' . $current_url['host'] ) == $referrer_host ||
+      $current_url['host'] == ( 'www.' . $referrer_host )
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
+/**
  * Syncs the referrers database with known & defined referrers
  */
 if ( ! function_exists( 'referrer_analytics_sync_log' ) ) {
   function referrer_analytics_sync_log() {
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'referrer_analytics';
+    $table_name = referrer_analytics_tables( 'log' );
     $log        = referrer_analytics_get_log();
     $referrers  = referrer_analytics_get_referrers();
 
@@ -22,6 +74,17 @@ if ( ! function_exists( 'referrer_analytics_sync_log' ) ) {
 
     foreach( $log as $key => $entry ) {
       $found_match = false;
+
+      if (
+        // Check to make sure the host isn't empty
+        ! $entry->referrer_host ||
+        // Check to make sure the referrer isn't the same as the current site.
+        ! referrer_analytics_is_external( $entry->referrer_host )
+      ) {
+        $wpdb->delete( $table_name, [
+          'referrer_id' => $entry->referrer_id
+        ]);
+      }
 
       foreach( $referrers as $k => $referrer ) {
         if( $referrer['host'] == $entry->referrer_host ) {
@@ -63,19 +126,6 @@ if ( ! function_exists( 'referrer_analytics_sync_log' ) ) {
         ], [ 'referrer_id' => $entry->referrer_id ] );
       }
     }
-  }
-}
-
-/**
- * Deletes an entry or everything from the referrers database
- */
-if ( ! function_exists( 'referrer_analytics_delete_log' ) ) {
-  function referrer_analytics_delete_log() {
-    global $wpdb;
-
-    $table_name = $wpdb->prefix . 'referrer_analytics';
-
-    $wpdb->query( "TRUNCATE TABLE $table_name" );
   }
 }
 
@@ -207,6 +257,11 @@ if ( ! function_exists( 'referrer_analytics_get_referrer' ) ) {
       // Referrer found, parse
       $url = parse_url( $referrer_url );
 
+      // Check to make sure the referrer isn't the same as the current site.
+      if ( ! referrer_analytics_is_external( $url['host'] ) ) {
+        return false;
+      }
+
       $referrer['url']    = $referrer_url;
       $referrer['scheme'] = ! empty( $url['scheme'] ) ? $url['scheme'] : false;
       $referrer['host']   = ! empty( $url['host'] ) ? $url['host'] : false;
@@ -215,7 +270,10 @@ if ( ! function_exists( 'referrer_analytics_get_referrer' ) ) {
       // Unable to get referrer, fallback to URL referrer
       $current_url = referrer_analytics_current_url();
 
-      if ( ! empty( $current_url['query'] ) && ! empty( $current_url['query'][ $options['referrer_fallback_param'] ] ) ) {
+      if (
+        ! empty( $current_url['query'] ) &&
+        ! empty( $current_url['query'][ $options['referrer_fallback_param'] ] )
+      ) {
         // URL referrer parameter found
         $url_referrer_source = $current_url['query']['utm_source'];
 
@@ -234,6 +292,8 @@ if ( ! function_exists( 'referrer_analytics_get_referrer' ) ) {
 
     $found = false;
     foreach( $hosts as $host_key => $host ) {
+      if ( ! $referrer['host'] ) { continue; }
+
       if ( $referrer['host'] === $host['host'] ) {
         $referrer = array_merge( $referrer, $host );
         $found = true;
@@ -267,7 +327,7 @@ if ( ! function_exists( 'referrer_analytics_log' ) ) {
     $current_url = referrer_analytics_current_url();
 
     // Insert referrer entry into the database
-    $table_name = $wpdb->prefix . 'referrer_analytics';
+    $table_name = referrer_analytics_tables( 'log' );
 
     $wpdb->insert( $table_name, [
       'date_recorded'        => current_time( 'mysql' ),
@@ -298,23 +358,68 @@ if ( ! function_exists( 'referrer_analytics_log' ) ) {
  * Returns the referrer entries from the database
  */
 if ( ! function_exists( 'referrer_analytics_get_log' ) ) {
-  function referrer_analytics_get_log( $args = [] ) {
+  function referrer_analytics_get_log( $args = [], $type = 'results' ) {
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'referrer_analytics';
+    $table_name = referrer_analytics_tables( 'log' );
 
-    $query = "SELECT * FROM $table_name";
-    if ( ! empty( $args['limit'] ) ) {
-      $query .= " LIMIT " .$args['limit'];
+    $sql = 'SELECT';
+
+    if ( 'total' == $type ) {
+      $sql .= ' COUNT(referrer_id)';
+    } elseif ( ! empty( $args['select'] ) ) {
+      $sql .= ' ' . implode( ',', $args['select'] );
+    } else {
+      $sql .= ' *';
     }
 
-    if ( ! empty( $args['offset'] ) ) {
-      $query .= ", " . $args['offset'];
+    $sql .= ' FROM ' . $table_name;
+
+    if ( ! empty( $args['where'] ) ) {
+      $sql .= ' WHERE';
+      $cnt = 0;
+      foreach( $args['where'] as $k => $v ) {
+        if ( $cnt ) {
+          $sql .= ' AND ';
+        } else {
+          $sql .= ' ';
+        }
+
+        if ( is_int( $v ) ) {
+          $sql .= $k . ' = ' . $v;
+        } else {
+          $sql .= $k . ' = "' . $v . '"';
+        }
+
+        $cnt++;
+      }
     }
 
-    $results = $wpdb->get_results( $query );
+    if ( ! empty( $args['orderby'] ) ) {
+      $sql .= ' ORDER BY ' . $args['orderby'];
+    }
 
-    return $results;
+    if ( ! empty( $args['order'] ) ) {
+      $sql .= ' ' . $args['order'];
+    }
+
+    if ( 'total' != $type ) {
+      if ( ! empty( $args['limit'] ) ) {
+        $sql .= ' LIMIT ' . $args['limit'];
+      }
+
+      if ( ! empty( $args['offset'] ) ) {
+        $sql .= ', ' . $args['offset'];
+      }
+    }
+
+    if ( 'results' == $type ) {
+      return $wpdb->get_results( $sql );
+    } elseif( 'row' == $type ) {
+      return $wpdb->get_row( $sql );
+    } else {
+      return $wpdb->get_var( $sql );
+    }
   }
 }
 
@@ -402,10 +507,19 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'www.google.se', 'type' => 'organic', 'name' => 'Google (Sweden)', 'primary_url' => 'https://www.google.se/' ],
       [ 'host' => 'www.google.es', 'type' => 'organic', 'name' => 'Google (Spain)', 'primary_url' => 'https://www.google.es/' ],
       [ 'host' => 'www.google.no', 'type' => 'organic', 'name' => 'Google (Norway)', 'primary_url' => 'https://www.google.no/' ],
+      [ 'host' => 'mail.google.com', 'type' => 'email', 'name' => 'Gmail', 'primary_url' => 'https://mail.google.com/' ],
+      [ 'host' => 'cloud.google.com', 'type' => 'referral', 'name' => 'Gmail', 'primary_url' => 'https://cloud.google.com/' ],
+      [ 'host' => 'webcache.googleusercontent.com', 'type' => 'referral', 'name' => 'Google (cache)', 'primary_url' => 'https://www.google.com/' ],
+      [ 'host' => 'www.google.com.cu', 'type' => 'organic', 'name' => 'Google (Cuba)', 'primary_url' => 'https://www.google.com.cu/' ],
+      [ 'host' => 'www.google.be', 'type' => 'organic', 'name' => 'Google (Belgium)', 'primary_url' => 'https://www.google.be/' ],
+      [ 'host' => 'www.google.sk', 'type' => 'organic', 'name' => 'Google (Slovakia)', 'primary_url' => 'https://www.google.sk/' ],
+      [ 'host' => 'www.google.com.sl', 'type' => 'organic', 'name' => 'Google (Sierra Leone)', 'primary_url' => 'https://www.google.com.sl/' ],
+      [ 'host' => 'www.google.gr', 'type' => 'organic', 'name' => 'Google (Greece)', 'primary_url' => 'https://www.google.gr/' ],
 
       // Bing
       [ 'host' => 'www.bing.com', 'type' => 'organic', 'name' => 'Bing', 'primary_url' => 'https://www.bing.com/' ],
       [ 'host' => 'cn.bing.com', 'type' => 'organic', 'name' => 'Bing (China)', 'primary_url' => 'https://www.bing.com/?mkt=zh-CN' ],
+      [ 'host' => 'www4.bing.com', 'type' => 'organic', 'name' => 'Bing', 'primary_url' => 'https://www4.bing.com/' ],
 
       // Yahoo
       [ 'host' => 'r.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo', 'primary_url' => 'https://www.yahoo.com/' ],
@@ -416,6 +530,7 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'in.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (India)', 'primary_url' => 'https://in.search.yahoo.com/' ],
       [ 'host' => 'tw.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (Taiwan)', 'primary_url' => 'https://tw.search.yahoo.com/' ],
       [ 'host' => 'au.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (Australia)', 'primary_url' => 'https://search.yahoo.com/' ],
+      [ 'host' => 'pl.search.yahoo.com', 'type' => 'organic', 'name' => 'Yahoo (Poland)', 'primary_url' => 'https://pl.search.yahoo.com/' ],
       [ 'host' => 'finance.yahoo.com', 'type' => 'referral', 'name' => 'Yahoo Finance', 'primary_url' => 'https://finance.yahoo.com/' ],
 
       // Other search engines
@@ -425,6 +540,7 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'www.qwant.com', 'type' => 'organic', 'name' => 'Qwant', 'primary_url' => 'https://www.qwant.com/' ],
       [ 'host' => 'go.mail.ru', 'type' => 'organic', 'name' => 'Поиск Mail.Ru', 'primary_url' => 'https://go.mail.ru/' ],
       [ 'host' => 'search.aol.com', 'type' => 'organic', 'name' => 'AOL', 'primary_url' => 'https://search.aol.com/' ],
+      [ 'host' => 'www.besthelp.com', 'type' => 'organic', 'name' => 'BestHelp', 'primary_url' => 'https://www.besthelp.com/' ],
 
       // Social media
       [ 'host' => 't.co', 'type' => 'social', 'name' => 'Twitter', 'primary_url' => 'https://twitter.com/' ],
@@ -435,11 +551,15 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'www.youtube.com', 'type' => 'social', 'name' => 'YouTube', 'primary_url' => 'https://www.youtube.com/' ],
       [ 'host' => 'www.reddit.com', 'type' => 'social', 'name' => 'reddit', 'primary_url' => 'https://www.reddit.com/' ],
       [ 'host' => 'l.messenger.com', 'type' => 'social', 'name' => 'Facebook (Messenger)', 'primary_url' => 'https://www.messenger.com/' ],
+      [ 'host' => 'com.linkedin.android', 'type' => 'social', 'name' => 'LinkedIn (Android)', 'primary_url' => 'https://www.linkedin.com/' ],
+      [ 'host' => 't.umblr.com', 'type' => 'social', 'name' => 'Tumblr', 'primary_url' => 'https://www.tumblr.com/' ],
+      [ 'host' => 'lnkd.in', 'type' => 'social', 'name' => 'LinkedIn', 'primary_url' => 'https://www.linkedin.com/' ],
 
       // WordPress
       [ 'host' => 'wordpress.org', 'type' => 'referral', 'name' => 'WordPress', 'primary_url' => 'https://wordpress.org/' ],
       [ 'host' => 'fr.wordpress.org', 'type' => 'referral', 'name' => 'WordPress (France)', 'primary_url' => 'https://fr.wordpress.org/' ],
       [ 'host' => 'nl.wordpress.org', 'type' => 'referral', 'name' => 'WordPress (Netherlands)', 'primary_url' => 'https://nl.wordpress.org/' ],
+      [ 'host' => 'es.wordpress.org', 'type' => 'referral', 'name' => 'WordPress (Spain)', 'primary_url' => 'https://es.wordpress.org/' ],
 
       // Others
       [ 'host' => 'site.ru', 'type' => 'bot', 'name' => 'site.ru', 'flag' => true ],
@@ -451,7 +571,9 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'jobsnearme.online', 'type' => 'referral', 'name' => 'Jobs Near Me', 'primary_url' => 'https://jobsnearme.online/' ],
       [ 'host' => 'www.entermedia.com', 'type' => 'referral', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
       [ 'host' => 'entermedianow.com', 'type' => 'redirect', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
+      [ 'host' => 'www.entermedianow.com', 'type' => 'redirect', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
       [ 'host' => 'entermedia.com', 'type' => 'referral', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
+      [ 'host' => 'www.entermedia.com', 'type' => 'referral', 'name' => 'Entermedia, LLC.', 'primary_url' => 'https://www.entermedia.com/' ],
       [ 'host' => 'forum.bubble.io', 'type' => 'referral', 'name' => 'Bubble Forum', 'primary_url' => 'https://forum.bubble.io/' ],
       [ 'host' => 'www.benmarshall.me', 'type' => 'referral', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
       [ 'host' => 'benmarshall.me', 'type' => 'referral', 'name' => 'Ben Marshall', 'primary_url' => 'https://benmarshall.me' ],
@@ -500,15 +622,35 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'theabcn.org', 'type' => 'referral', 'name' => 'American Board of Clinical Neuropsychology', 'primary_url' => 'https://theabcn.org/' ],
       [ 'host' => 'lenny.pl', 'type' => 'referral', 'name' => 'Portal Lenny', 'primary_url' => 'http://lenny.pl/' ],
       [ 'host' => 'www.phase2technology.com', 'type' => 'referral', 'name' => 'Phase2', 'primary_url' => 'https://www.phase2technology.com/' ],
+      [ 'host' => 'timemachine.ai', 'type' => 'referral', 'name' => 'Time Machine (SparkCognition)', 'primary_url' => 'https://timemachine.ai/' ],
+      [ 'host' => 'go.sparkcognition.com', 'type' => 'redirect', 'name' => 'SparkCognition (redirect)', 'primary_url' => 'https://go.sparkcognition.com/' ],
+      [ 'host' => 'sparkcognition.com', 'type' => 'referral', 'name' => 'SparkCognition', 'primary_url' => 'https://sparkcognition.com/' ],
+      [ 'host' => 'sucuri.net', 'type' => 'referral', 'name' => 'Sucuri', 'primary_url' => 'https://sucuri.net/' ],
+      [ 'host' => 'www.prnewswire.com', 'type' => 'referral', 'name' => 'PR Newswire', 'primary_url' => 'https://www.prnewswire.com/' ],
+      [ 'host' => 'iiot-world.com', 'type' => 'referral', 'name' => 'IIoT World', 'primary_url' => 'http://iiot-world.com/' ],
+      [ 'host' => 'www.yammer.com', 'type' => 'referral', 'name' => 'Yammer', 'primary_url' => 'https://www.yammer.com/' ],
+      [ 'host' => 'www.g2.com', 'type' => 'referral', 'name' => 'G2', 'primary_url' => 'https://www.g2.com/' ],
+      [ 'host' => 'www.cognitivetimes.com', 'type' => 'referral', 'name' => 'Cognitive Times (SparkCognition)', 'primary_url' => 'https://www.cognitivetimes.com/' ],
+      [ 'host' => 'www.gitex.com', 'type' => 'referral', 'name' => 'GITEX', 'primary_url' => 'https://www.gitex.com/' ],
+      [ 'host' => 'www.jc2ventures.com', 'type' => 'referral', 'name' => 'JC2 Ventures', 'primary_url' => 'https://www.jc2ventures.com/' ],
+      [ 'host' => 'jukelogic.com', 'type' => 'referral', 'name' => 'JukeLogic', 'primary_url' => 'https://jukelogic.com/' ],
+      [ 'host' => 'www.av-comparatives.org', 'type' => 'referral', 'name' => 'AV Comparatives', 'primary_url' => 'https://www.av-comparatives.org/' ],
+      [ 'host' => 'www.scss.tcd.ie', 'type' => 'referral', 'name' => 'Trinity College Dublin', 'primary_url' => 'https://www.scss.tcd.ie/' ],
+      [ 'host' => 'www.fieldinglawtexas.com', 'type' => 'referral', 'name' => 'Fielding Law', 'primary_url' => 'https://www.fieldinglaw.com/' ],
 
       // Edge cases
       [ 'host' => 'PANTHEON_STRIPPED', 'type' => 'direct', 'name' => 'Direct Traffic' ],
+      [ 'host' => 'PANTHEON_STRIPPED (UTM Source)', 'type' => 'direct', 'name' => 'Direct Traffic' ],
       [ 'host' => 'localhost', 'type' => 'intranet', 'name' => 'localhost' ],
       [ 'host' => 'benmarshall.local', 'type' => 'intranet', 'name' => 'Ben Marshall' ],
 
       // UTM sources
-      [ 'host' => 'jobify plugin (UTM Source) ', 'type' => 'referral', 'name' => 'WordPress.org (Jobify plugin)', 'primary_url' => 'https://wordpress.org/plugins/jobify/', 'inferred' => true ],
-      [ 'host' => 'wordpress_zero_spam (UTM Source) ', 'type' => 'referral', 'name' => 'WordPress.org (WordPress Zero Spam plugin)', 'primary_url' => 'https://wordpress.org/plugins/zero-spam/', 'inferred' => true ],
+      [ 'host' => 'jobify plugin (UTM Source)', 'type' => 'referral', 'name' => 'WordPress.org (Jobify plugin)', 'primary_url' => 'https://wordpress.org/plugins/jobify/', 'inferred' => true ],
+      [ 'host' => 'wordpress_zero_spam (UTM Source)', 'type' => 'referral', 'name' => 'WordPress.org (WordPress Zero Spam plugin)', 'primary_url' => 'https://wordpress.org/plugins/zero-spam/', 'inferred' => true ],
+      [ 'host' => 'newsletter (UTM Source)', 'type' => 'referral', 'name' => 'Newsletter', 'inferred' => true ],
+      [ 'host' => 'www.google.com (UTM Source)', 'type' => 'organic', 'name' => 'Google', 'inferred' => true ],
+      [ 'host' => 'wordpress.org (UTM Source)', 'type' => 'referral', 'name' => 'WordPress.org', 'inferred' => true ],
+      [ 'host' => 'twitter.com (UTM Source)', 'type' => 'social', 'name' => 'Twitter', 'inferred' => true ],
     ];
   }
 }

@@ -13,7 +13,7 @@
  * Plugin Name:       Referrer Analytics
  * Plugin URI:        https://benmarshall.me/referrer-analytics
  * Description:       Track & store where your users came from for better reporting data in Google Analytics, conversion tracking & more. Make qualified decisions based on facts & figures, not conjecture.
- * Version:           1.6.1
+ * Version:           1.7.0
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Ben Marshall
@@ -31,7 +31,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 // Define plugin constants
 define( 'REFERRER_ANALYTICS', __FILE__ );
 define( 'REFERRER_ANALYTICS_DB_VERSION', '1.0' );
-define( 'REFERRER_ANALYTICS_VERSION', '1.6.1' );
+define( 'REFERRER_ANALYTICS_VERSION', '1.7.0' );
 
 /**
  * Install plugin tables
@@ -53,7 +53,7 @@ function referrer_analytics_install() {
       referrer_host VARCHAR(255) NOT NULL,
       referrer_type VARCHAR(255) NOT NULL,
       referrer_name VARCHAR(255) NOT NULL,
-      visitor_ip VARCHAR(255) NOT NULL,
+      visitor_ip VARCHAR(39) NOT NULL,
       user_id BIGINT NOT NULL,
       url_destination VARCHAR(255) NOT NULL,
       is_flagged BOOLEAN NOT NULL DEFAULT FALSE,

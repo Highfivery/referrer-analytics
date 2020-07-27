@@ -9,13 +9,31 @@
 function referrer_analytics_admin_menu() {
   $options = referrer_analytics_options();
 
-  $main_page = add_menu_page(
+  add_menu_page(
     __( 'Referrer Analytics Log', 'wpzerospam' ),
     __( 'Referrer Analytics', 'wpzerospam' ),
     'manage_options',
     'referrer-analytics',
-    'referrer_analytics_log_page',
+    'referrer_analytics_dashboard_page',
     'dashicons-chart-area'
+  );
+
+  add_submenu_page(
+    'referrer-analytics',
+    __( 'Referrer Analytics Dashboard', 'wpzerospam' ),
+    __( 'Dashboard', 'wpzerospam' ),
+    'manage_options',
+    'referrer-analytics',
+    'referrer_analytics_dashboard_page'
+  );
+
+  add_submenu_page(
+    'referrer-analytics',
+    __( 'Referrer Analytics Log', 'wpzerospam' ),
+    __( 'Referrer Log', 'wpzerospam' ),
+    'manage_options',
+    'referrer-analytics-log',
+    'referrer_analytics_log_page'
   );
 
   add_submenu_page(
@@ -29,11 +47,54 @@ function referrer_analytics_admin_menu() {
 }
 add_action( 'admin_menu', 'referrer_analytics_admin_menu' );
 
+function referrer_analytics_log_page() {
+  if ( ! current_user_can( 'manage_options' ) ) { return; }
+
+  referrer_analytics_sync_log();
+  ?>
+  <div class="wrap">
+    <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+
+    <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/callout.php'; ?>
+
+    <?php
+    /**
+     * Log table
+     */
+    require plugin_dir_path( REFERRER_ANALYTICS ) . '/classes/class-referrer-analytics-log-table.php';
+
+    $table_data = new ReferrerAnalytics_Log_Table();
+
+    // Setup page parameters
+    $current_page = $table_data->get_pagenum();
+    $current_page = (isset($current_page)) ? $current_page : 1;
+    $paged        = ( isset( $_GET['page'] ) ) ? absint( $_GET['page'] ) : $current_page;
+    $paged        = ( isset( $_GET['paged'] ) ) ? absint(  $_GET['paged'] ) : $current_page;
+    $paged        = ( isset( $args['paged'] ) ) ? $args['paged'] : $paged;
+
+    // Fetch, prepare, sort, and filter our data...
+    $table_data->prepare_items();
+    ?>
+    <form id="log-table" method="post">
+      <?php wp_nonce_field( 'referreranalytics_nonce', 'referreranalytics_nonce' ); ?>
+
+      <?php # Current page ?>
+      <input type="hidden" name="paged" value="<?php echo $paged; ?>" />
+
+      <?php $table_data->display(); ?>
+    </form>
+  </div>
+  <?php
+}
+
 function referrer_analytics_options_page() {
   if ( ! current_user_can( 'manage_options' ) ) { return; }
    ?>
    <div class="wrap">
      <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+
+     <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/callout.php'; ?>
+
      <form action="options.php" method="post">
      <?php
      // Output security fields for the registered setting "referrer_analytics"
@@ -47,16 +108,16 @@ function referrer_analytics_options_page() {
      ?>
      </form>
    </div>
-   <?php
- }
+  <?php
+}
 
- function referrer_analytics_log_page() {
+function referrer_analytics_dashboard_page() {
   if ( ! current_user_can( 'manage_options' ) ) { return; }
 
   referrer_analytics_sync_log();
 
   // Get referrers data
-  $log             = referrer_analytics_get_log();
+  $log             = referrer_analytics_get_log( [], 'results' );
   $parsed_log      = referrer_analytics_parse_log( $log );
   $known_referrers = referrer_analytics_referrers();
 
@@ -89,17 +150,7 @@ function referrer_analytics_options_page() {
   <div class="wrap">
     <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
-    <div class="referrer-analytics-callout">
-      <div class="referrer-analytics-callout-content">
-        <h2><?php _e( 'Are you a fan of the <a href="https://benmarshall.me/referrer-analytics/?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" target="_blank">Referrer Analytics</a> plugin? Show your support.', 'referrer-analytics' ); ?></h2>
-        <p><?php _e( 'Help support the continued development of the Referrer Analytics plugin by <a href="https://benmarshall.me/donate?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" target="_blank">donating today</a>. Your donation goes towards the time it takes to develop new features &amp; updates, but also helps provide pro bono work for nonprofits. <a href="https://benmarshall.me/donate?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" target="_blank">Learn more</a>.', 'referrer-analytics' ); ?></p>
-      </div>
-      <div class="referrer-analytics-callout-actions">
-        <a href="https://github.com/bmarshall511/referrer-analytics/issues" class="button" target="_blank"><?php _e( 'Submit Bug/Feature Request' ); ?></a>
-        <a href="https://github.com/bmarshall511/referrer-analytics" class="button" target="_blank"><?php _e( 'Fork on Github' ); ?></a>
-        <a href="https://benmarshall.me/donate?utm_source=referrer_analytics&utm_medium=settings_page&utm_campaign=admin" class="button button-primary" target="_blank"><?php _e( 'Show your Support &mdash; Donate' ); ?></a>
-      </div>
-    </div>
+    <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/callout.php'; ?>
 
     <?php if ( $current_page === 1 ): ?>
       <h2><?php _e( 'Statistics', 'referrer-analytics' ); ?></h2>
@@ -116,37 +167,6 @@ function referrer_analytics_options_page() {
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/not-available-referrers.php'; ?>
       </div>
     <?php endif; ?>
-
-    <h2><?php _e( 'Referrer Log', 'referrer-analytics' ); ?></h2>
-
-    <a href="<?php echo admin_url( 'options-general.php?page=referrer-analytics&delete=log' ); ?>" style="float: right" class="button button-primary"><?php _e( 'Delete All Log Entries', 'referrer-analytics' ); ?></a>
-
-    <?php
-    /**
-     * Log table
-     */
-    require plugin_dir_path( REFERRER_ANALYTICS ) . '/classes/class-referrer-analytics-log-table.php';
-
-    $table_data = new ReferrerAnalytics_Log_Table();
-
-    // Setup page parameters
-    $current_page = $table_data->get_pagenum();
-    $current_page = (isset($current_page)) ? $current_page : 1;
-    $paged        = ( isset( $_GET['page'] ) ) ? absint( $_GET['page'] ) : $current_page;
-    $paged        = ( isset( $_GET['paged'] ) ) ? absint(  $_GET['paged'] ) : $current_page;
-    $paged        = ( isset( $args['paged'] ) ) ? $args['paged'] : $paged;
-
-    // Fetch, prepare, sort, and filter our data...
-    $table_data->prepare_items();
-    ?>
-    <form id="log-table" method="post">
-      <?php wp_nonce_field( 'referreranalytics_nonce', 'referreranalytics_nonce' ); ?>
-
-      <?php # Current page ?>
-      <input type="hidden" name="paged" value="<?php echo $paged; ?>" />
-
-      <?php $table_data->display(); ?>
-    </form>
   <?php
  }
 
@@ -162,12 +182,6 @@ function referrer_analytics_options_page() {
  }
 
  function referrer_analytics_admin_init() {
-  if ( ! empty( $_REQUEST['delete'] ) && 'log' === $_REQUEST['delete'] ) {
-    referrer_analytics_delete_log();
-    wp_redirect( admin_url( 'options-general.php?page=referrer-analytics' ) );
-    exit();
-  }
-
   $options = referrer_analytics_options();
 
   register_setting( 'referrer_analytics', 'referrer_analytics_options', 'referrer_analytics_validate_options' );

@@ -130,7 +130,10 @@ class ReferrerAnalytics_Log_Table extends WP_List_Table {
 
   // Register bulk actions
   function get_bulk_actions() {
-    $actions = [ 'delete' => __( 'Delete', 'referreranalytics' ) ];
+    $actions = [
+      'delete'     => __( 'Delete Selected', 'referreranalytics' ),
+      'delete_all' => __( 'Delete All', 'referreranalytics' )
+    ];
 
     return $actions;
   }
@@ -181,19 +184,30 @@ class ReferrerAnalytics_Log_Table extends WP_List_Table {
     $hidden   = $this->get_hidden_columns();
     $sortable = $this->get_sortable_columns();
 
-    $data = referrer_analytics_get_log();
-    usort( $data, [ &$this, 'sort_data' ] );
-
     $per_page     = 50;
     $current_page = $this->get_pagenum();
-    $total_items  = count( $data );
+    $offset       = $per_page * ( $current_page - 1 );
+    $order        = ! empty( $_REQUEST['order'] ) ? sanitize_text_field( $_REQUEST['order'] ) : 'desc';
+    $orderby      = ! empty( $_REQUEST['orderby'] ) ? sanitize_text_field( $_REQUEST['orderby'] ) : 'date_recorded';
+
+    $query_args = [
+      'limit'   => $per_page,
+      'offset'  => $offset,
+      'order'   => $order,
+      'orderby' => $orderby
+    ];
+    $data = referrer_analytics_get_log( $query_args );
+    if ( ! $data ) { return false; }
+
+    $total_items = referrer_analytics_get_log( $query_args, 'total' );
 
     $this->set_pagination_args([
       'total_items' => $total_items,
-      'per_page'    => $per_page
+      'per_page'    => $per_page,
+      'total_pages'	=> ceil( $total_items / $per_page ),
+      'orderby'	    => $orderby,
+			'order'		    => $order
     ]);
-
-    $data = array_slice ( $data, ( ( $current_page - 1 ) * $per_page ), $per_page );
 
     $this->_column_headers = [ $columns, $hidden, $sortable ];
     $this->items           = $data;
@@ -203,7 +217,8 @@ class ReferrerAnalytics_Log_Table extends WP_List_Table {
   function process_bulk_action() {
     global $wpdb;
 
-    $ids = ( isset( $_REQUEST['ids'] ) ) ? $_REQUEST['ids'] : '';
+    $ids        = ( isset( $_REQUEST['ids'] ) ) ? $_REQUEST['ids'] : '';
+    $table_name = $wpdb->prefix . 'referrer_analytics';
 
     switch( $this->current_action() ) {
       // Delete
@@ -214,9 +229,12 @@ class ReferrerAnalytics_Log_Table extends WP_List_Table {
         if ( ! empty ( $ids ) && is_array( $ids ) ) {
           // Delete query
           foreach( $ids as $k => $referrer_id ) {
-            $wpdb->delete( $wpdb->prefix . 'referrer_analytics', [ 'referrer_id' => $referrer_id  ] );
+            $wpdb->delete( $table_name, [ 'referrer_id' => $referrer_id  ] );
           }
         }
+      break;
+      case 'delete_all':
+        $wpdb->query( "TRUNCATE TABLE $table_name" );
       break;
     }
   }
