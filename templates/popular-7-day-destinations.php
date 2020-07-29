@@ -30,14 +30,17 @@ if ( $log ) {
   <h3><?php _e( 'Most Popular Referrers (past 7 days)', 'referrer-analytics' ); ?></h3>
   <div class="inside">
     <?php if ( $entries ): ?>
-      <ol>
+      <ol class="referreranalytics-list">
         <?php
         $cnt = 0;
         foreach( $entries as $url => $count ):
           $cnt++;
           if ( $cnt > 15 ) { break; }
           ?>
-          <li><strong><a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo str_replace( site_url(), '', $url ); ?></a></strong> &mdash; <?php echo $count; ?></li>
+          <li>
+            <a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo str_replace( site_url(), '', $url ); ?></a>
+            <span class="referreranalytics-list-count"><?php echo number_format( $count, 0 ); ?></span>
+          </li>
         <?php endforeach; ?>
       </ol>
     <?php else: ?>

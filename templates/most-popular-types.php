@@ -10,14 +10,42 @@
   <h3><?php _e( 'Most Popular Referrer Types', 'referrer-analytics' ); ?></h3>
   <div class="inside">
     <?php if ( $type_totals ): ?>
-      <ol>
+      <ol class="referreranalytics-list">
         <?php
         $cnt = 0;
         foreach( $type_totals as $type => $count ):
           $cnt++;
           if ( $cnt > 15 ) { break; }
           ?>
-          <li><strong><?php echo $type; ?></strong> &mdash; <?php echo $count; ?></li>
+          <li>
+            <span>
+              <?php
+              switch( $type ):
+                case 'organic':
+                  echo __( 'Organic', 'referreranalytics' );
+                break;
+                case 'referral':
+                  echo __( 'Referral', 'referreranalytics' );
+                break;
+                case 'bot':
+                  echo __( 'Bot', 'referreranalytics' );
+                break;
+                case 'social':
+                  echo __( 'Social Network', 'referreranalytics' );
+                break;
+                case 'email':
+                  echo __( 'Email', 'referreranalytics' );
+                break;
+                case 'intranet':
+                  echo __( 'Intranet', 'referreranalytics' );
+                break;
+                default:
+                  echo $type;
+              endswitch;
+              ?>
+            </span>
+            <span class="referreranalytics-list-count"><?php echo number_format( $count, 0 ); ?></span>
+          </li>
         <?php endforeach; ?>
       </ol>
     <?php else: ?>

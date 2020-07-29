@@ -46,8 +46,6 @@
         }
       endforeach;
 
-      krsort( $parsed );
-
       $datasets = [];
       $labels   = [];
       foreach( $parsed as $date => $data ) {

@@ -72,7 +72,15 @@ class ReferrerAnalytics_Log_Table extends WP_List_Table {
     switch( $column_name ) {
       case 'visitor_ip':
         if ( ! empty( $item->visitor_ip ) ) {
-          return '<a href="https://whatismyipaddress.com/ip/' . $item->visitor_ip .'" target="_blank" rel="noopener noreferrer">' . $item->visitor_ip . '</a>';
+          $host = gethostbyaddr( $item->visitor_ip );
+
+          $ip_address = '<a href="https://whatismyipaddress.com/ip/' . $item->visitor_ip .'" target="_blank" rel="noopener noreferrer">' . $item->visitor_ip . '</a>';
+
+          if ( $host != $item->visitor_ip ) {
+            $ip_address .= '<br /><span style="margin-top: 3px" class="referreranalytics-small">' . $host . '</span>';
+          }
+
+          return $ip_address;
         }
 
         return 'N/A';

@@ -5,7 +5,7 @@ Donate link: https://benmarshall.me/donate/?utm_source=referrer_analytics&utm_me
 Requires at least: 5.2
 Tested up to: 5.4.2
 Requires PHP: 7.1
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: GNU GPLv3
 License URI: https://choosealicense.com/licenses/gpl-3.0/
 
@@ -92,10 +92,18 @@ Due to some server hosts like [Pantheon](https://pantheon.io/docs/pantheon_strip
 
 == Screenshots ==
 
-1. Referrer Analytics statistics, charts & log screen
-2. Referrer Analytics settings screen
+1. Referrer Analytics statistics & charts
+2. Referrer Analytics statistics & charts
+3. Referrer Analytics log
+4. Referrer Analytics settings screen
 
 == Changelog ==
+
+= v1.7.1 =
+
+* Added additional pre-defined referrer hosts
+* Fixed the line charts direction
+* Various UI enhancements
 
 = v1.7.0 =
 

@@ -157,11 +157,11 @@ function referrer_analytics_dashboard_page() {
       <div class="referrer-analytics-boxes">
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/referrers-line-chart.php'; ?>
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/types-line-chart.php'; ?>
-        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/referrers-pie-chart.php'; ?>
-        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/types-pie-chart.php'; ?>
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/popular-7-day-referrers.php'; ?>
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/most-popular-referrers.php'; ?>
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/most-popular-types.php'; ?>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/referrers-pie-chart.php'; ?>
+        <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/types-pie-chart.php'; ?>
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/popular-7-day-destinations.php'; ?>
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/most-popular-destinations.php'; ?>
         <?php require plugin_dir_path( REFERRER_ANALYTICS ) . '/templates/not-available-referrers.php'; ?>

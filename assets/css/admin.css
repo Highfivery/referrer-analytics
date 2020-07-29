@@ -1,3 +1,10 @@
+.referreranalytics-small {
+  color: #666;
+  display: inline-block;
+  font-size: 11px;
+  line-height: 1;
+}
+
 .referrer-analytics-callout {
   align-items: center;
   background: #fff;
@@ -6,6 +13,35 @@
   display: flex;
   flex-wrap: wrap;
   padding: 20px;
+}
+
+.referreranalytics-list {
+  counter-reset: list-counter;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.referreranalytics-list li {
+  counter-increment: list-counter;
+  display: flex;
+  padding: 5px;
+}
+
+.referreranalytics-list li::before {
+  content: counter(list-counter) ".";
+  font-weight: bold;
+  margin-right: 5px;;
+}
+
+.referreranalytics-list li:nth-child(odd) {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.referreranalytics-list-count {
+  flex-grow: 1;
+  font-weight: bold;
+  text-align: right;
 }
 
 .referrer-analytics-callout h2 {
@@ -108,6 +144,7 @@
 
 .referrer-analytics-box-unknown-referrers ol {
   columns: 4;
+  column-gap: 40px;
 }
 
 @media (min-width: 768px) {

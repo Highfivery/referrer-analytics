@@ -457,6 +457,7 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
   function referrer_analytics_referrers() {
     return [
       // Google
+      [ 'host' => 'google.com', 'type' => 'organic', 'name' => 'Google', 'primary_url' => 'https://www.google.com/' ],
       [ 'host' => 'www.google.at', 'type' => 'organic', 'name' => 'Google (Austria)', 'primary_url' => 'https://www.google.at/' ],
       [ 'host' => 'www.google.ca', 'type' => 'organic', 'name' => 'Google (Canada)', 'primary_url' => 'https://www.google.ca/' ],
       [ 'host' => 'www.google.com', 'type' => 'organic', 'name' => 'Google', 'primary_url' => 'https://www.google.com/' ],
@@ -515,6 +516,8 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'www.google.sk', 'type' => 'organic', 'name' => 'Google (Slovakia)', 'primary_url' => 'https://www.google.sk/' ],
       [ 'host' => 'www.google.com.sl', 'type' => 'organic', 'name' => 'Google (Sierra Leone)', 'primary_url' => 'https://www.google.com.sl/' ],
       [ 'host' => 'www.google.gr', 'type' => 'organic', 'name' => 'Google (Greece)', 'primary_url' => 'https://www.google.gr/' ],
+      [ 'host' => 'www.google.rs', 'type' => 'organic', 'name' => 'Google (Serbia)', 'primary_url' => 'https://www.google.rs/' ],
+      [ 'host' => 'www.google.bj', 'type' => 'organic', 'name' => 'Google (Benin)', 'primary_url' => 'https://www.google.bj/' ],
 
       // Bing
       [ 'host' => 'www.bing.com', 'type' => 'organic', 'name' => 'Bing', 'primary_url' => 'https://www.bing.com/' ],
@@ -535,17 +538,21 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
 
       // Other search engines
       [ 'host' => 'duckduckgo.com', 'type' => 'organic', 'name' => 'DuckDuckGo', 'primary_url' => 'https://duckduckgo.com/' ],
+      [ 'host' => 'html.duckduckgo.com', 'type' => 'organic', 'name' => 'DuckDuckGo', 'primary_url' => 'https://duckduckgo.com/' ],
       [ 'host' => 'baidu.com', 'type' => 'organic', 'name' => 'Baidu', 'primary_url' => 'http://www.baidu.com/' ],
       [ 'host' => 'www.ecosia.org', 'type' => 'organic', 'name' => 'Ecosia', 'primary_url' => 'https://www.ecosia.org/' ],
       [ 'host' => 'www.qwant.com', 'type' => 'organic', 'name' => 'Qwant', 'primary_url' => 'https://www.qwant.com/' ],
       [ 'host' => 'go.mail.ru', 'type' => 'organic', 'name' => 'Поиск Mail.Ru', 'primary_url' => 'https://go.mail.ru/' ],
       [ 'host' => 'search.aol.com', 'type' => 'organic', 'name' => 'AOL', 'primary_url' => 'https://search.aol.com/' ],
       [ 'host' => 'www.besthelp.com', 'type' => 'organic', 'name' => 'BestHelp', 'primary_url' => 'https://www.besthelp.com/' ],
+      [ 'host' => 'yandex.com', 'type' => 'organic', 'name' => 'Yandex', 'primary_url' => 'https://yandex.com/' ],
+      [ 'host' => 'm.instasrch.com', 'type' => 'organic', 'name' => 'Instasrch (mobile)', 'primary_url' => 'https://m.instasrch.com/search' ],
 
       // Social media
       [ 'host' => 't.co', 'type' => 'social', 'name' => 'Twitter', 'primary_url' => 'https://twitter.com/' ],
       [ 'host' => 'twitter.com', 'type' => 'social', 'name' => 'Twitter', 'primary_url' => 'https://twitter.com/' ],
       [ 'host' => 'www.facebook.com', 'type' => 'social', 'name' => 'Facebook', 'primary_url' => 'https://www.facebook.com/' ],
+      [ 'host' => 'l.facebook.com', 'type' => 'social', 'name' => 'Facebook', 'primary_url' => 'https://www.facebook.com/' ],
       [ 'host' => 'www.linkedin.com', 'type' => 'social', 'name' => 'LinkedIn', 'primary_url' => 'https://www.linkedin.com/' ],
       [ 'host' => 'www.instagram.com', 'type' => 'social', 'name' => 'Instagram', 'primary_url' => 'https://www.instagram.com/' ],
       [ 'host' => 'www.youtube.com', 'type' => 'social', 'name' => 'YouTube', 'primary_url' => 'https://www.youtube.com/' ],
@@ -637,6 +644,20 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       [ 'host' => 'www.av-comparatives.org', 'type' => 'referral', 'name' => 'AV Comparatives', 'primary_url' => 'https://www.av-comparatives.org/' ],
       [ 'host' => 'www.scss.tcd.ie', 'type' => 'referral', 'name' => 'Trinity College Dublin', 'primary_url' => 'https://www.scss.tcd.ie/' ],
       [ 'host' => 'www.fieldinglawtexas.com', 'type' => 'referral', 'name' => 'Fielding Law', 'primary_url' => 'https://www.fieldinglaw.com/' ],
+      [ 'host' => 'davidwalsh.name', 'type' => 'referral', 'name' => 'David Walsh Blog', 'primary_url' => 'https://davidwalsh.name/' ],
+      [ 'host' => 'pi.pardot.com', 'type' => 'referral', 'name' => 'Pardot', 'primary_url' => 'https://pi.pardot.com/' ],
+      [ 'host' => 'www.nvidia.com', 'type' => 'referral', 'name' => 'NVIDIA', 'primary_url' => 'https://www.nvidia.com/' ],
+      [ 'host' => 'www.stockwatch.com', 'type' => 'referral', 'name' => 'Stockwatch', 'primary_url' => 'https://www.stockwatch.com/' ],
+      [ 'host' => 'analyticsindiamag.com', 'type' => 'referral', 'name' => 'Analytics India Magazine', 'primary_url' => 'https://analyticsindiamag.com/' ],
+      [ 'host' => 'www.theladders.com', 'type' => 'referral', 'name' => 'Ladders', 'primary_url' => 'https://www.theladders.com/' ],
+      [ 'host' => 'medium.com', 'type' => 'referral', 'name' => 'Medium', 'primary_url' => 'https://medium.com/' ],
+      [ 'host' => 'emerj.com', 'type' => 'referral', 'name' => 'Emerj', 'primary_url' => 'https://emerj.com/' ],
+      [ 'host' => 'builtin.com', 'type' => 'referral', 'name' => 'Built In', 'primary_url' => 'https://builtin.com/' ],
+      [ 'host' => 'brainvueacademy.com', 'type' => 'referral', 'name' => 'BrainVue Academy', 'primary_url' => 'https://brainvueacademy.com/' ],
+      [ 'host' => 'searchsmart.com.au', 'type' => 'referral', 'name' => 'Searchsmart', 'primary_url' => 'https://searchsmart.com.au/' ],
+      [ 'host' => 'devfrontend.info', 'type' => 'referral', 'name' => 'FrontEndDeveloper', 'primary_url' => 'http://devfrontend.info/' ],
+      [ 'host' => 'workona.com', 'type' => 'referral', 'name' => 'Workona', 'primary_url' => 'https://workona.com/' ],
+      [ 'host' => 'drupal.stackexchange.com', 'type' => 'referral', 'name' => 'Drupal Answers', 'primary_url' => 'https://drupal.stackexchange.com/' ],
 
       // Edge cases
       [ 'host' => 'PANTHEON_STRIPPED', 'type' => 'direct', 'name' => 'Direct Traffic' ],
@@ -647,7 +668,7 @@ if ( ! function_exists( 'referrer_analytics_referrers' ) ) {
       // UTM sources
       [ 'host' => 'jobify plugin (UTM Source)', 'type' => 'referral', 'name' => 'WordPress.org (Jobify plugin)', 'primary_url' => 'https://wordpress.org/plugins/jobify/', 'inferred' => true ],
       [ 'host' => 'wordpress_zero_spam (UTM Source)', 'type' => 'referral', 'name' => 'WordPress.org (WordPress Zero Spam plugin)', 'primary_url' => 'https://wordpress.org/plugins/zero-spam/', 'inferred' => true ],
-      [ 'host' => 'newsletter (UTM Source)', 'type' => 'referral', 'name' => 'Newsletter', 'inferred' => true ],
+      [ 'host' => 'newsletter (UTM Source)', 'type' => 'email', 'name' => 'Newsletter', 'inferred' => true ],
       [ 'host' => 'www.google.com (UTM Source)', 'type' => 'organic', 'name' => 'Google', 'inferred' => true ],
       [ 'host' => 'wordpress.org (UTM Source)', 'type' => 'referral', 'name' => 'WordPress.org', 'inferred' => true ],
       [ 'host' => 'twitter.com (UTM Source)', 'type' => 'social', 'name' => 'Twitter', 'inferred' => true ],

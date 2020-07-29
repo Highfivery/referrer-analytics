@@ -24,10 +24,10 @@ if ( $log ) {
 }
 ?>
  <div class="referrer-analytics-box referrer-analytics-box-unknown-referrers">
-  <h3><?php _e( 'Unknown Referrers', 'referrer-analytics' ); ?></h3>
+  <h3><?php _e( 'Top 100 Unknown Referrers', 'referrer-analytics' ); ?></h3>
   <div class="inside">
     <?php if ( $unknown ): ?>
-      <ol>
+      <ol class="referreranalytics-list">
         <?php
         $cnt = 0;
         foreach( $unknown as $host => $count ):
@@ -35,7 +35,8 @@ if ( $log ) {
         if ( $cnt > 100 ) { break; }
         ?>
           <li>
-            <?php echo $host . ' &mdash; ' . $count; ?>
+            <?php echo $host; ?>
+            <span class="referreranalytics-list-count"><?php echo number_format( $count, 0 ); ?></span>
           </li>
         <?php endforeach; ?>
         </ol>
