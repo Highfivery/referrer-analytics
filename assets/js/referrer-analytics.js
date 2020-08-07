@@ -38,22 +38,27 @@ var ReferrerAnalytics = {
     var utm_content  = this.getURLParam( 'utm_content' );
 
     if ( utm_source ) {
+      Cookies.remove( 'referrer-analytics-utm_source' );
       Cookies.set( 'referrer-analytics-utm_source', utm_source );
     }
 
     if ( utm_medium ) {
+      Cookies.remove( 'referrer-analytics-utm_medium' );
       Cookies.set( 'referrer-analytics-utm_medium', utm_medium );
     }
 
     if ( utm_campaign ) {
+      Cookies.remove( 'referrer-analytics-utm_campaign' );
       Cookies.set( 'referrer-analytics-utm_campaign', utm_campaign );
     }
 
     if ( utm_term ) {
+      Cookies.remove( 'referrer-analytics-utm_term' );
       Cookies.set( 'referrer-analytics-utm_term', utm_term );
     }
 
     if ( utm_content ) {
+      Cookies.remove( 'referrer-analytics-utm_content' );
       Cookies.set( 'referrer-analytics-utm_content', utm_content );
     }
   },

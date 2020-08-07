@@ -18,7 +18,7 @@
           if ( $cnt > 15 ) { break; }
           ?>
           <li>
-            <span>
+            <span class="referreranalytics-list-label">
               <?php
               switch( $type ):
                 case 'organic':

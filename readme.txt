@@ -5,7 +5,7 @@ Donate link: https://benmarshall.me/donate/?utm_source=referrer_analytics&utm_me
 Requires at least: 5.2
 Tested up to: 5.4.2
 Requires PHP: 7.1
-Stable tag: 1.7.1
+Stable tag: 1.7.2
 License: GNU GPLv3
 License URI: https://choosealicense.com/licenses/gpl-3.0/
 
@@ -98,6 +98,11 @@ Due to some server hosts like [Pantheon](https://pantheon.io/docs/pantheon_strip
 4. Referrer Analytics settings screen
 
 == Changelog ==
+
+= v1.7.2 =
+
+* Fixed overflow issue with top lists
+* Added additional pre-defined referrer hosts
 
 = v1.7.1 =
 

@@ -38,7 +38,9 @@ if ( $log ) {
           if ( $cnt > 15 ) { break; }
           ?>
           <li>
-            <a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo str_replace( site_url(), '', $url ); ?></a>
+            <span class="referreranalytics-list-label">
+              <a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo str_replace( site_url(), '', $url ); ?></a>
+            </span>
             <span class="referreranalytics-list-count"><?php echo number_format( $count, 0 ); ?></span>
           </li>
         <?php endforeach; ?>

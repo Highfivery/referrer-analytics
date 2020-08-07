@@ -35,7 +35,7 @@ if ( $log ) {
         if ( $cnt > 100 ) { break; }
         ?>
           <li>
-            <?php echo $host; ?>
+            <span class="referreranalytics-list-label"><?php echo $host; ?></span>
             <span class="referreranalytics-list-count"><?php echo number_format( $count, 0 ); ?></span>
           </li>
         <?php endforeach; ?>

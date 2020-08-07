@@ -18,7 +18,7 @@
           if ( $cnt > 15 ) { break; }
           ?>
           <li>
-            <span>
+            <span class="referreranalytics-list-label">
               <?php if ( ! empty( $entry['primary_url'] ) ): ?><a href="<?php echo esc_url( $entry['primary_url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php endif; ?>
               <?php echo $entry['name']; ?>
               <?php if ( ! empty( $entry['primary_url'] ) ): ?></a><?php endif; ?>
