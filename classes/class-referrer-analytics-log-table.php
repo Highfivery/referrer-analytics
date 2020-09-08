@@ -6,244 +6,234 @@
  * @since 1.0.0
  */
 
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+// Security Note: Blocks direct access to the plugin PHP files.
+defined( 'ABSPATH' ) || die();
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
-  require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
-class ReferrerAnalytics_Log_Table extends WP_List_Table {
-  function __construct() {
-    global $status, $page;
+/**
+ * Log table class.
+ */
+class Referrer_Analytics_Log_Table extends WP_List_Table {
+	/**
+	 * Class constructor.
+	 */
+	public function __construct() {
+		global $status, $page;
 
-    $args = [
-      'singular'  => __( 'Referrer Log Entry', 'referreranalytics' ),
-      'plural'    => __( 'Referrer Log Entries', 'referreranalytics' ),
-      'ajax'      => true
-    ];
-    parent::__construct( $args );
-  }
+		$args = array(
+			'singular' => __( 'Referrer Log Entry', 'referrer-analytics' ),
+			'plural'   => __( 'Referrer Log Entries', 'referrer-analytics' ),
+		);
 
-  // Register columns
-  function get_columns() {
-    // Render a checkbox instead of text
-    $columns = [
-      'cb'              => '<input type="checkbox" />',
-      'date_recorded'   => __( 'Date', 'referreranalytics' ),
-      'visitor_ip'      => __( 'IP', 'referreranalytics' ),
-      'user_id'         => __( 'User', 'referreranalytics' ),
-      'referrer_url'    => __( 'Referring URL', 'referreranalytics' ),
-      'url_destination' => __( 'URL Destination', 'referreranalytics' ),
-      'referrer_host'   => __( 'Referrer Host', 'referreranalytics' ),
-      'referrer_type'   => __( 'Referrer Type', 'referreranalytics' ),
-      'referrer_name'   => __( 'Referrer Name', 'referreranalytics' ),
-    ];
+		parent::__construct( $args );
+	}
 
-    return $columns;
-  }
+	/**
+	 * Register table columns.
+	 */
+	public function get_columns() {
+		$columns = array(
+			'cb'              => '<input type="checkbox" />',
+			'date_recorded'   => __( 'Date', 'referrer-analytics' ),
+			'visitor_ip'      => __( 'IP', 'referrer-analytics' ),
+			'user_id'         => __( 'User', 'referrer-analytics' ),
+			'referrer_url'    => __( 'Referring URL', 'referrer-analytics' ),
+			'url_destination' => __( 'URL Destination', 'referrer-analytics' ),
+			'referrer_host'   => __( 'Referrer Host', 'referrer-analytics' ),
+			'referrer_type'   => __( 'Referrer Type', 'referrer-analytics' ),
+			'referrer_name'   => __( 'Referrer Name', 'referrer-analytics' ),
+		);
 
-  // Sortable columns
-  function get_sortable_columns() {
-    $sortable_columns = [
-      'date_recorded'   => [ 'date_recorded', false ],
-      'visitor_ip'      => [ 'visitor_ip', false ],
-      'user_id'         => [ 'user_id', false ],
-      'referrer_url'    => [ 'referrer_url', false ],
-      'url_destination' => [ 'url_destination', false ],
-      'referrer_host'   => [ 'referrer_host', false ],
-      'referrer_type'   => [ 'referrer_type', false ],
-      'referrer_name'   => [ 'referrer_name', false ],
-    ];
+		return $columns;
+	}
 
-    return $sortable_columns;
-  }
+	/**
+	 * Define sortable columns.
+	 */
+	public function get_sortable_columns() {
+		$sortable_columns = array(
+			'date_recorded'   => array( 'date_recorded', false ),
+			'visitor_ip'      => array( 'visitor_ip', false ),
+			'user_id'         => array( 'user_id', false ),
+			'referrer_url'    => array( 'referrer_url', false ),
+			'url_destination' => array( 'url_destination', false ),
+			'referrer_host'   => array( 'referrer_host', false ),
+			'referrer_type'   => array( 'referrer_type', false ),
+			'referrer_name'   => array( 'referrer_name', false ),
+		);
 
-  // Checkbox column
-  function column_cb( $item ){
-    return sprintf(
-        '<input type="checkbox" name="%1$s[]" value="%2$s" />',
-        /*$1%s*/ 'ids',
-        /*$2%s*/ $item->referrer_id
-    );
-  }
+		return $sortable_columns;
+	}
 
-  // Render column
-  function column_default( $item, $column_name ) {
-    switch( $column_name ) {
-      case 'visitor_ip':
-        if ( ! empty( $item->visitor_ip ) ) {
-          $host = gethostbyaddr( $item->visitor_ip );
+	/**
+	 * Checkbox column.
+	 *
+	 * @param array $item Item from the table.
+	 */
+	public function column_cb( $item ) {
+		return sprintf(
+			'<input type="checkbox" name="%1$s[]" value="%2$s" />',
+			/*$1%s*/ 'ids',
+			/*$2%s*/ $item['referrer_id']
+		);
+	}
 
-          $ip_address = '<a href="https://whatismyipaddress.com/ip/' . $item->visitor_ip .'" target="_blank" rel="noopener noreferrer">' . $item->visitor_ip . '</a>';
+	/**
+	 * Render the column value.
+	 *
+	 * @param array  $item Item from the table.
+	 * @param string $column_name Column key.
+	 */
+	public function column_default( $item, $column_name ) {
+		$value = 'N/A';
 
-          if ( $host != $item->visitor_ip ) {
-            $ip_address .= '<br /><span style="margin-top: 3px" class="referreranalytics-small">' . $host . '</span>';
-          }
+		switch ( $column_name ) {
+			case 'visitor_ip':
+				if ( rest_is_ip_address( $item['visitor_ip'] ) ) {
+					$value = '<a href="https://whatismyipaddress.com/ip/' . $item['visitor_ip'] . '" target="_blank" rel="noopener noreferrer">' . $item['visitor_ip'] . '</a>';
+				}
+				break;
+			case 'date_recorded':
+				$value = gmdate( 'M j, Y g:ia', strtotime( $item['date_recorded'] ) );
+				break;
+			case 'user_id':
+				if ( ! empty( $item['user_id'] ) ) {
+					$user = get_user_by( 'ID', $item['user_id'] );
+					if ( $user ) {
+						$value = '<a href="' . get_edit_user_link( $user->ID ) . '">' . $user->display_name . ' (' . $user->ID . ')</a>';
+					}
+				}
+				break;
+			case 'referrer_url':
+				if ( ! empty( $item['referrer_url'] ) ) {
+					$value = '<a href="' . esc_url( $item['referrer_url'] ) . '" target="_blank" rel="noopener noreferrer">' . $item['referrer_url'] . '</a>';
+				}
+				break;
+			case 'url_destination':
+				if ( ! empty( $item['url_destination'] ) ) {
+					$value = '<a href="' . esc_url( $item['url_destination'] ) . '" target="_blank" rel="noopener noreferrer">' . $item['url_destination'] . '</a>';
+				}
+				break;
+			case 'referrer_host':
+				if ( ! empty( $item['referrer_host'] ) ) {
+					$value = $item['referrer_host'];
+				}
+				break;
+			case 'referrer_type':
+				if ( ! empty( $item['referrer_type'] ) ) {
+					$value = $item['referrer_type'];
+				}
+				break;
+			case 'referrer_name':
+				if ( ! empty( $item['referrer_name'] ) ) {
+					$value = $item['referrer_name'];
+				}
+				break;
+		}
 
-          return $ip_address;
-        }
+		return $value;
+	}
 
-        return 'N/A';
-      break;
-      case 'date_recorded':
-        return date( 'M j, Y g:ia' , strtotime( $item->date_recorded ) );
-      break;
-      case 'user_id':
-        if ( ! empty( $item->user_id ) ) {
-          $user = get_user_by( 'ID',  $item->user_id );
-          if ( ! $user ) { return 'N/A'; }
+	/**
+	 * Register bulk actions.
+	 */
+	public function get_bulk_actions() {
+		$actions = array(
+			'delete'     => __( 'Delete Selected', 'referrer-analytics' ),
+			'delete_all' => __( 'Delete All', 'referrer-analytics' ),
+		);
 
-          return '<a href="' . get_edit_user_link( $user->ID ) . '">' . $user->display_name . ' (' . $user->ID . ')</a>';
-        }
+		return $actions;
+	}
 
-        return 'N/A';
-      break;
-      case 'referrer_url':
-        if ( ! empty( $item->referrer_url ) ) {
-          return '<a href="' . esc_url( $item->referrer_url ) . '" target="_blank" rel="noopener noreferrer">' . $item->referrer_url . '</a>';
-        }
+	/**
+	 * Define which columns are hidden
+	 */
+	public function get_hidden_columns() {
+		return array();
+	}
 
-        return 'N/A';
-      break;
-      case 'url_destination':
-        if ( ! empty( $item->url_destination ) ) {
-          return '<a href="' . esc_url( $item->url_destination ) . '" target="_blank" rel="noopener noreferrer">' . $item->url_destination . '</a>';
-        }
+	/**
+	 * Get log entries.
+	 */
+	public function prepare_items() {
+		global $referrer_analytics;
 
-        return 'N/A';
-      break;
-      case 'referrer_host':
-        if ( ! empty( $item->referrer_host ) ) {
-          return $item->referrer_host;
-        }
+		$this->process_bulk_action();
 
-        return 'N/A';
-      break;
-      case 'referrer_type':
-        if ( ! empty( $item->referrer_type ) ) {
-          return $item->referrer_type;
-        }
+		$columns  = $this->get_columns();
+		$hidden   = $this->get_hidden_columns();
+		$sortable = $this->get_sortable_columns();
 
-        return 'N/A';
-      break;
-      case 'referrer_name':
-        if ( ! empty( $item->referrer_name ) ) {
-          return $item->referrer_name;
-        }
+		$per_page     = 50;
+		$current_page = $this->get_pagenum();
+		$offset       = $per_page * ( $current_page - 1 );
+		$order        = ! empty( $_REQUEST['order'] ) ? sanitize_text_field( $_REQUEST['order'] ) : 'desc'; // phpcs:ignore
+		$orderby      = ! empty( $_REQUEST['orderby'] ) ? sanitize_text_field( $_REQUEST['orderby'] ) : 'date_recorded'; // phpcs:ignore
 
-        return 'N/A';
-      break;
-    }
-  }
+		$query_args = array(
+			'limit'   => $per_page,
+			'offset'  => $offset,
+			'order'   => $order,
+			'orderby' => $orderby,
+		);
+		$data       = $referrer_analytics->get_log( $query_args );
+		if ( ! $data ) {
+			return false;
+		}
 
-  // Register bulk actions
-  function get_bulk_actions() {
-    $actions = [
-      'delete'     => __( 'Delete Selected', 'referreranalytics' ),
-      'delete_all' => __( 'Delete All', 'referreranalytics' )
-    ];
+		$total_items = $referrer_analytics->get_log(
+			array(
+				'select' => array(
+					'COUNT(referrer_id)',
+				),
+			),
+			true
+		);
 
-    return $actions;
-  }
+		$this->set_pagination_args(
+			array(
+				'total_items' => $total_items,
+				'per_page'    => $per_page,
+				'total_pages' => ceil( $total_items / $per_page ),
+				'orderby'     => $orderby,
+				'order'       => $order,
+			)
+		);
 
-  /**
-   * Define which columns are hidden
-   *
-   * @return Array
-   */
-  public function get_hidden_columns() {
-    return [];
-  }
+		$this->_column_headers = array( $columns, $hidden, $sortable );
+		$this->items           = $data;
+	}
 
-  /**
-   * Allows you to sort the data by the variables set in the $_GET
-   *
-   * @return Mixed
-   */
-  private function sort_data( $a, $b ) {
-    // Set defaults
-    $orderby = 'date_recorded';
-    $order   = 'desc';
+	/**
+	 * Process bulk actions.
+	 */
+	public function process_bulk_action() {
+		global $wpdb;
 
-    // If orderby is set, use this as the sort column
-    if( ! empty( $_GET['orderby'] ) ) {
-      $orderby = $_GET['orderby'];
-    }
+		$nonce = ( isset( $_POST['referrer_analytics_nonce'] ) ) ? $_POST['referrer_analytics_nonce'] : '';
+		if ( ! wp_verify_nonce( $nonce, 'referrer_analytics_nonce' ) ) {
+			return false;
+		}
 
-    // If order is set use this as the order
-    if ( ! empty($_GET['order'] ) ) {
-      $order = $_GET['order'];
-    }
+		$ids        = ( isset( $_REQUEST['ids'] ) ) ? $_REQUEST['ids'] : ''; // phpcs:ignore
+		$table_name = $wpdb->prefix . 'referrer_analytics';
 
-    $result = strcmp( $a->$orderby, $b->$orderby );
-
-    if ( $order === 'asc' ) {
-      return $result;
-    }
-
-    return -$result;
-  }
-
-  // Get results
-  function prepare_items($args = []) {
-    $this->process_bulk_action();
-
-    $columns  = $this->get_columns();
-    $hidden   = $this->get_hidden_columns();
-    $sortable = $this->get_sortable_columns();
-
-    $per_page     = 50;
-    $current_page = $this->get_pagenum();
-    $offset       = $per_page * ( $current_page - 1 );
-    $order        = ! empty( $_REQUEST['order'] ) ? sanitize_text_field( $_REQUEST['order'] ) : 'desc';
-    $orderby      = ! empty( $_REQUEST['orderby'] ) ? sanitize_text_field( $_REQUEST['orderby'] ) : 'date_recorded';
-
-    $query_args = [
-      'limit'   => $per_page,
-      'offset'  => $offset,
-      'order'   => $order,
-      'orderby' => $orderby
-    ];
-    $data = referrer_analytics_get_log( $query_args );
-    if ( ! $data ) { return false; }
-
-    $total_items = referrer_analytics_get_log( $query_args, 'total' );
-
-    $this->set_pagination_args([
-      'total_items' => $total_items,
-      'per_page'    => $per_page,
-      'total_pages'	=> ceil( $total_items / $per_page ),
-      'orderby'	    => $orderby,
-			'order'		    => $order
-    ]);
-
-    $this->_column_headers = [ $columns, $hidden, $sortable ];
-    $this->items           = $data;
-  }
-
-  // Process bulk actions
-  function process_bulk_action() {
-    global $wpdb;
-
-    $ids        = ( isset( $_REQUEST['ids'] ) ) ? $_REQUEST['ids'] : '';
-    $table_name = $wpdb->prefix . 'referrer_analytics';
-
-    switch( $this->current_action() ) {
-      // Delete
-      case 'delete':
-        $nonce = ( isset( $_POST['referreranalytics_nonce'] ) ) ? $_POST['referreranalytics_nonce'] : '';
-        if ( ! wp_verify_nonce( $nonce, 'referreranalytics_nonce' ) ) return false;
-
-        if ( ! empty ( $ids ) && is_array( $ids ) ) {
-          // Delete query
-          foreach( $ids as $k => $referrer_id ) {
-            $wpdb->delete( $table_name, [ 'referrer_id' => $referrer_id  ] );
-          }
-        }
-      break;
-      case 'delete_all':
-        $wpdb->query( "TRUNCATE TABLE $table_name" );
-      break;
-    }
-  }
+		switch ( $this->current_action() ) {
+			// Delete item.
+			case 'delete':
+				if ( ! empty( $ids ) && is_array( $ids ) ) {
+					foreach ( $ids as $k => $referrer_id ) {
+						$wpdb->delete( $table_name, array( 'referrer_id' => $referrer_id  ) ); // phpcs:ignore
+					}
+				}
+				break;
+			case 'delete_all':
+				$wpdb->query( "TRUNCATE TABLE $table_name" ); // phpcs:ignore
+				break;
+		}
+	}
 }
