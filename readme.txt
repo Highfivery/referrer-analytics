@@ -42,10 +42,6 @@ You can also customize what values are used in the UTM parameters using defined 
 
 In addition, when plugin cookies are enabled, the user’s last known UTM values will be stored in a cookie that can be accessed by 3rd-party applications like [Pardot](https://pi.pardot.com/) for advanced conversion tracking.
 
-= Built for WordPress Developers =
-
-Referrer Analytics was built with WordPress developers in mind. Several useful helper functions are included allowing you to easily integrate with 3rd-party applications, implement advanced A/B testing, create referrer specific content & more.
-
 == Installation ==
 
 1. Upload the entire referrer-analytics folder to the `/wp-content/plugins/` directory.
