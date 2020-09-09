@@ -5,7 +5,7 @@ Donate link: https://benmarshall.me/donate/?utm_source=referrer_analytics&utm_me
 Requires at least: 5.2
 Tested up to: 5.4.2
 Requires PHP: 7.1
-Stable tag: 1.7.2
+Stable tag: 2.0.0
 License: GNU GPLv3
 License URI: https://choosealicense.com/licenses/gpl-3.0/
 
@@ -13,19 +13,18 @@ Track & store where users come from for enhanced reporting in Google Analytics, 
 
 == Description ==
 
-Get analytics from site referrers, insights into types of referring traffic, automated [GA campaign URLs](https://support.google.com/analytics/answer/1033863) and developer tools to send data to 3rd-party applications for conversation tracking.
+A powerful site referrer analytics plugin. Get insights into types of referring traffic, automated [GA campaign URLs](https://support.google.com/analytics/answer/1033863), and useful tracking data for advanced reporting, conversation tracking, and 3rd-party integration.
 
 = On-site Reporting & Statistics =
 
-Referrer Analytics is a powerful tool allowing site admins to get valuable insights into referring traffic. View on-site reporting and statistics in the admin dashboard with interactive visual graphs and detailed logging including:
+A powerful tool that allows owners to gain valuable insights into referring traffic. View on-site reporting and statistics with interactive visual graphs and detailed logging including:
 
 * Date & time users were referred
-* IP addresses of referred users with quick links for [geolocation information](https://benmarshall.me/html5-geolocation/)
-* Ability to track authenticated users that come from a referrer
-* The type of referring traffic: <em>organic, bots, referral, etc.</em>
-* Referring hostnames with human-readable versions such as <em>Google (United Kingdom)</em>
+* IP addresses of referred users & their [geolocation](https://benmarshall.me/html5-geolocation/)
+* Types of referring traffic: <em>organic, bots, referral, etc.</em>
+* Human-readable referrers (ex. Google (United Kingdom), Facebook, etc.)
 * Referred destination URLs & top landing pages from referrers
-* Toplists of referrers, types of referrers and popular landing pages
+* Toplists of referrers, types of referrers, popular landing pages & more
 * Helpful recommendations to block known malicious referrers
 
 = Automated Google Analytics Integration =
@@ -34,17 +33,13 @@ Referrer Analytics also allows you to automatically track [Google Analytics camp
 
 Here’s how it works:
 
-1. A user comes to your site from a referring URL like Google or WordPress
+1. User comes to your site from a referring URL like Google or WordPress
 2. Referrer Analytics automatically retrieves the referrers information from a list of known referrers and your own defined ones
 3. The user will be smartly redirected to their destination with GA campaign data automatically appended to the URL (i.e. `utm_source`, `utm_medium` and `utm_campaign`)
 
-You can also customize what values are used in the UTM parameters using defined referrers that are setup in the admin dashboard.
+You can customize values used in UTM parameters using defined hosts setup in the admin dashboard.
 
-In addition, when plugin cookies are enabled, the user’s last known UTM values will be stored in a cookie that can be accessed by 3rd-party applications like [Pardot](https://pi.pardot.com/) for advanced conversion tracking.
-
-= Built for WordPress Developers =
-
-Referrer Analytics was built with WordPress developers in mind. Several useful helper functions are included allowing you to easily integrate with 3rd-party applications, implement advanced A/B testing, create referrer specific content & more.
+When plugin cookies are enabled, the user’s last known UTM values and referrer information will be stored in cookies that can be accessed by 3rd-party applications like [Pardot](https://pi.pardot.com/) for advanced reporting, conversion tracking, etc.
 
 == Installation ==
 
@@ -56,39 +51,50 @@ For more information, see the [plugin’s website](https://benmarshall.me/referr
 
 == Frequently Asked Questions ==
 
-= Referrers not showing in the log? =
+= What is a "self-referral"? =
 
-Referrer Analytics relies on `$_SERVER['HTTP_REFERER]` to get site referrers. Due to increasing privacy settings, there's a handful of edge cases where this variable is not set:
+A "self-referral" is traffic coming to the site that has been referred by the same site. Referrer Analytics will typically ignore this type of traffic except when ran on certain hosts such as Pantheon.io. Learn more about "self-referrals" in [Pantheon's documentation](https://pantheon.io/docs/pantheon_stripped).
 
-* The user was a "direct" visitor and typed the URL into the browser bar or used a bookmark.
-* The user followed a link from outside the browser (for example from an email or mobile app).
-* The user came to your non-secure `http` site from a secure `https` site and the browser hid the referrer for security reasons.
-* The user modified their browser not to send a referrer (such as using a browser extension to hide the information).
-* The user is using a proxy server that removes referrer headers.
-* The user clicked a link that has an HTML5 [`rel=noreferrer` attribute](https://html.spec.whatwg.org/multipage/links.html#link-type-noreferrer).
-* A site uses JavaScript to link to your site. Many browsers don't send a referrer when JavaScript uses `window.open` or `location.href` to open or set a URL.
-* A page redirects to yours with a [`meta refresh`](https://stackoverflow.com/questions/2985579/does-http-equiv-refresh-keep-referrer-info-and-metadata/24283850#24283850). Browsers either reset or remove the original referrer with this type of redirect.
-* The request was made by a robot that is not programmed to send referrer information. (Even legitimate robots such as Googlebot often do not send a referrer).
+= What aren't my user referrers being logged? =
+
+Referrer Analytics relies on `$_SERVER['HTTP_REFERER]`. Due to increasing privacy settings, there's a handful of edge cases where this variable isn't available:
+
+* "direct" visitors (typed a URL into the browser bar or used a bookmark)
+* Followed a link from outside the browser (for example from an email or mobile app)
+* Referred from non-secure `http` to `https` and the browser hid the referrer for security
+* Browser modified to not send referrer (such as using a browser extension)
+* Using a proxy server that removes referrer headers
+* Clicked a link that has an HTML5 [`rel=noreferrer` attribute](https://html.spec.whatwg.org/multipage/links.html#link-type-noreferrer)
+* Uses JavaScript to link to your site (`window.open` or `location.href`)
+* [`meta refresh`](https://stackoverflow.com/questions/2985579/does-http-equiv-refresh-keep-referrer-info-and-metadata/24283850#24283850) redirects (browsers remove the original referrer with this type of redirect)
+* Request was made by a robot (even legitimate robots such as Googlebot often do not send a referrer)
 
 You can choose to have a URL parameter fallback if one exists such as `utm_source` if the `$_SERVER['HTTP_REFERER]` is unavailable. Note that some CMS like WordPress, automatcially add `rel=noreferrer` to external links. You can control this from the plugin settings page.
 
-= What are the names of the referrer-specific cookies? =
+= What referrer cookies are available =
 
-* `referrer-analytics-referrer_name`<br /><em>Human-readable name of the user's referrer</em>
-* `referrer-analytics-referrer_type`<br /><em>Type of the user's referrer</em>
-* `referrer-analytics-referrer_host`<br /><em>Host of the user's referrer</em>
-* `referrer-analytics-referrer_scheme`<br /><em>The scheme of the user's referrer</em>
-* `referrer-analytics-referrer_url`<br /><em>The url where the user came from</em>
-* `referrer-analytics-referrer_destination`<br /><em>The user's original destination</em>
+When plugin cookies are enabled, referrer-specific cookies are set and can be used for advanced tracking and reporting (ex. pass UTM values to hidden form inputs).
 
-= What are the names of the GA-specific cookies? =
-Due to some server hosts like [Pantheon](https://pantheon.io/docs/pantheon_stripped) and the way they handle UTM parameters, the following cookies are set via JavaScript vs. server variables. JavaScript must be enable for these to work.
+The following cookies are available:
 
-* `referrer-analytics-utm_source`<br /><em>The user's last known `utm_source`</em>
-* `referrer-analytics-utm_medium`<br /><em>The user's last known `utm_medium`</em>
-* `referrer-analytics-utm_campaign`<br /><em>The user's last known `utm_campaign`</em>
-* `referrer-analytics-utm_term`<br /><em>The user's last known `utm_term`</em>
-* `referrer-analytics-utm_content`<br /><em>The user's last known `utm_content`</em>
+* `referrer-analytics-referrer_name`
+* `referrer-analytics-referrer_type`
+* `referrer-analytics-referrer_host`
+* `referrer-analytics-referrer_scheme`
+* `referrer-analytics-referrer_url`
+* `referrer-analytics-referrer_destination`
+
+= What Google Analytics cookies are available? =
+
+You can access [Google Analytics UTM values](https://support.google.com/analytics/answer/1033863?hl=en) via cookies when plugin cookies are enabled. This can be useful with certain hosts like [Pantheon](https://pantheon.io/docs/pantheon_stripped), that strip this information on the backend. They also persist during the user's session allowing advanced tracking and reporting (ex. pass UTM values to hidden form inputs).
+
+The following cookies are available:
+
+* `referrer-analytics-utm_source`
+* `referrer-analytics-utm_medium`
+* `referrer-analytics-utm_campaign`
+* `referrer-analytics-utm_term`
+* `referrer-analytics-utm_content`
 
 == Screenshots ==
 
@@ -98,6 +104,12 @@ Due to some server hosts like [Pantheon](https://pantheon.io/docs/pantheon_strip
 4. Referrer Analytics settings screen
 
 == Changelog ==
+
+= v2.0.0 =
+
+* Optimized JS & resource loading
+* Enhanced statistics dashboard
+* Re-write of the code base
 
 = v1.7.2 =
 
