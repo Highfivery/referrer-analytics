@@ -487,7 +487,7 @@ class Referrer_Analytics {
 		add_submenu_page(
 			'options-general.php',
 			__( 'Referrer Analytics Settings', 'referrer-analytics' ),
-			__( 'Referrer Analytics Settings', 'referrer-analytics' ),
+			__( 'Referrer Analytics', 'referrer-analytics' ),
 			'manage_options',
 			'referrer-analytics-settings',
 			array( $this, 'admin_settings' )

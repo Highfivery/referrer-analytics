@@ -31,6 +31,12 @@ if ( ! function_exists( 'referrer_analytics_predefined_hosts' ) ) {
 				'primary_url' => 'https://www.google.com/',
 			),
 			array(
+				'host'        => 'www.google.co.ve',
+				'type'        => 'organic',
+				'name'        => 'Google (Venezuela)',
+				'primary_url' => 'https://www.google.co.ve/',
+			),
+			array(
 				'host'        => 'www.google.at',
 				'type'        => 'organic',
 				'name'        => 'Google (Austria)',
@@ -233,6 +239,12 @@ if ( ! function_exists( 'referrer_analytics_predefined_hosts' ) ) {
 				'type'        => 'organic',
 				'name'        => 'Google (Indonesia)',
 				'primary_url' => 'https://www.google.co.id/',
+			),
+			array(
+				'host'        => 'www.google.cm',
+				'type'        => 'organic',
+				'name'        => 'Google (Cameroon)',
+				'primary_url' => 'https://www.google.cm/',
 			),
 			array(
 				'host'        => 'www.google.co.il',
@@ -485,6 +497,12 @@ if ( ! function_exists( 'referrer_analytics_predefined_hosts' ) ) {
 				'primary_url' => 'https://www.yahoo.com/',
 			),
 			array(
+				'host'        => 'search.yahoo.co.jp',
+				'type'        => 'organic',
+				'name'        => 'Yahoo (Japan)',
+				'primary_url' => 'https://search.yahoo.co.jp/',
+			),
+			array(
 				'host'        => 'search.yahoo.com',
 				'type'        => 'organic',
 				'name'        => 'Yahoo',
@@ -675,6 +693,12 @@ if ( ! function_exists( 'referrer_analytics_predefined_hosts' ) ) {
 				'primary_url' => 'https://www.linkedin.com/',
 			),
 			array(
+				'host'        => 'www.linkedin.cn',
+				'type'        => 'social',
+				'name'        => 'LinkedIn (China)',
+				'primary_url' => 'http://www.linkedin.cn/',
+			),
+			array(
 				'host'        => 'www.instagram.com',
 				'type'        => 'social',
 				'name'        => 'Instagram',
@@ -824,13 +848,13 @@ if ( ! function_exists( 'referrer_analytics_predefined_hosts' ) ) {
 			),
 			array(
 				'host'        => 'entermedianow.com',
-				'type'        => 'redirect',
+				'type'        => 'referral',
 				'name'        => 'Entermedia, LLC.',
 				'primary_url' => 'https://www.entermedia.com/',
 			),
 			array(
 				'host'        => 'www.entermedianow.com',
-				'type'        => 'redirect',
+				'type'        => 'referral',
 				'name'        => 'Entermedia, LLC.',
 				'primary_url' => 'https://www.entermedia.com/',
 			),
@@ -1135,8 +1159,8 @@ if ( ! function_exists( 'referrer_analytics_predefined_hosts' ) ) {
 			),
 			array(
 				'host'        => 'go.sparkcognition.com',
-				'type'        => 'redirect',
-				'name'        => 'SparkCognition (redirect)',
+				'type'        => 'referral',
+				'name'        => 'SparkCognition',
 				'primary_url' => 'https://go.sparkcognition.com/',
 			),
 			array(
@@ -1321,7 +1345,7 @@ if ( ! function_exists( 'referrer_analytics_predefined_hosts' ) ) {
 				),
 			array(
 				'host'        => 'learn.sparkcognition.com',
-				'type'        => 'redirect',
+				'type'        => 'referral',
 				'name'        => 'SparkCognition',
 				'primary_url' => 'https://www.sparkcognition.com/',
 			),
@@ -1438,6 +1462,13 @@ if ( ! function_exists( 'referrer_analytics_predefined_hosts' ) ) {
 				'type'        => 'referral',
 				'name'        => 'Canz Marketing',
 				'primary_url' => 'https://www.canzmarketing.com/',
+			),
+
+			// Edge cases.
+			array(
+				'host'        => 'PANTHEON_STRIPPED',
+				'type'        => 'self-referral',
+				'name'        => 'Self-referral',
 			),
 		);
 	}
