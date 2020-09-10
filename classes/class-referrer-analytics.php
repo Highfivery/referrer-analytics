@@ -844,7 +844,7 @@ class Referrer_Analytics {
 			'referrer_host'        => $referrer['host'],
 			'referrer_type'        => ! empty( $referrer['type'] ) ? sanitize_text_field( $referrer['type'] ) : false,
 			'referrer_name'        => ! empty( $referrer['name'] ) ? sanitize_text_field( $referrer['name'] ) : false,
-			'visitor_ip'           => $this->get_ip_address() ? $this->get_ip_address() : 'unknown',
+			'visitor_ip'           => $this->get_ip_address() ? wp_privacy_anonymize_ip( $this->get_ip_address() ) : 'unknown',
 			'user_id'              => get_current_user_id(),
 			'url_destination'      => $current_url['current'],
 			'is_flagged'           => ! empty( $referrer['is_flagged'] ) ? true : false,
